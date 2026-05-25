@@ -1,0 +1,122 @@
+﻿@model Sistema_Financiero.Models.UsuarioModelo
+
+@{
+    ViewData["Title"] = "Nuevo Usuario";
+}
+
+<style>
+    .form-container {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        max-width: 500px;
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #475569;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+        .form-control:focus {
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 4px rgba(43,108,176,0.1);
+        }
+
+    .btn-guardar {
+        background: #1e40af;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-cancelar {
+        background: #f1f5f9;
+        color: #475569;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-left: 10px;
+    }
+</style>
+
+<h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:5px;">
+    Nuevo Usuario
+</h2>
+<p style="color:#718096;margin-bottom:20px;">Completá los datos para registrar un nuevo acceso.</p>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert-danger" style="margin-bottom:15px;">@ViewBag.Error</div>
+}
+
+<div class="form-container">
+    <form action="@Url.Action("Crear", "Usuarios")" method="POST">
+
+        <div class="form-group">
+            <label>Código Empleado</label>
+            <input type="number" name="CodigoEmpleado" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+            <label>Nombre de Usuario</label>
+            <input type="text" name="Nombre" class="form-control" placeholder="ej: j.perez" required />
+        </div>
+
+        <div class="form-group">
+            <label>Clave</label>
+            <input type="password" name="Clave" class="form-control" required />
+        </div>
+
+        <div class="form-group">
+            <label>Rol</label>
+            <select name="CodigoRol" class="form-control">
+                @if (ViewBag.Roles != null)
+                {
+                    @foreach (System.Data.DataRow rol in ((System.Data.DataTable)ViewBag.Roles).Rows)
+                    {
+                        <option value="@rol["CodigoRol"]">@rol["Nombre"]</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Estado</label>
+            <select name="Estado" class="form-control">
+                <option value="true">Activo</option>
+                <option value="false">Inactivo</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-guardar">Guardar</button>
+        <a href="@Url.Action("Index", "Usuarios")" class="btn-cancelar">Cancelar</a>
+    </form>
+</div>

@@ -1,0 +1,161 @@
+﻿@model System.Data.DataTable
+
+@{
+    ViewData["Title"] = "Lista de Empleados";
+}
+
+<style>
+    /* CONTENEDOR ELÁSTICO */
+    .table-container {
+        width: 100%;
+        max-width: 100%;
+        background: #ffffff;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        margin-top: 20px;
+        box-sizing: border-box;
+        overflow-x: auto;
+    }
+
+    /* TABLA BASE (Para monitores grandes) */
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 13px;
+        color: #2d3748;
+    }
+
+        .custom-table thead tr {
+            background-color: #f8f9fa;
+            color: #4a5568;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #edf2f7;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 10px 12px;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody tr {
+            border-bottom: 1px solid #edf2f7;
+            transition: background-color 0.15s ease;
+        }
+
+            .custom-table tbody tr:hover {
+                background-color: #f7fafc;
+            }
+
+    .text-nowrap {
+        white-space: nowrap;
+    }
+
+    .emp-name {
+        color: #2b6cb0;
+        font-weight: 500;
+    }
+
+    .badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-block;
+        text-transform: uppercase;
+    }
+
+    .badge-activo {
+        background-color: #e6fffa;
+        color: #00a389;
+    }
+
+    .badge-inactivo {
+        background-color: #ffeeee;
+        color: #e53e3e;
+    }
+
+   
+
+    /* Si la pantalla es mediana o laptop estándar */
+    @@media screen and (max-width: 1300px) {
+        .custom-table {
+            font-size: 11.5px;
+        }
+
+            .custom-table th,
+            .custom-table td {
+                padding: 8px 6px;
+            }
+
+        .badge {
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+    }
+
+    /* Si la pantalla es aún más pequeña (Laptops pequeñas o Tablets) */
+    @@media screen and (max-width: 1100px) {
+        .custom-table {
+            font-size: 11px;
+        }
+
+            .custom-table th,
+            .custom-table td {
+                padding: 6px 4px;
+            }
+    }
+</style>
+
+<h2 style="font-family: 'Segoe UI', sans-serif; color: #2d3748; font-weight: 600; margin-bottom: 5px;">Lista de Empleados</h2>
+<p style="color: #718096; margin-bottom: 20px;">Gestión y control del personal activo en el sistema.</p>
+
+<div class="table-container">
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th class="text-nowrap">Código Emp.</th>
+                <th class="text-nowrap">Sucursal</th>
+                <th>Nombre</th>
+                <th class="text-nowrap">Teléfono</th>
+                <th class="text-nowrap">Fecha de Ingreso</th>
+                <th class="text-nowrap">Dirección</th>
+                <th class="text-nowrap">Fecha Nacimiento</th>
+                <th>Cargo</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (System.Data.DataRow fila in Model.Rows)
+            {
+                <tr>
+                    <td><strong>@fila["CodigoEmpleado"]</strong></td>
+                    <td>@fila["CodigoSucursal"]</td>
+                    <td class="text-nowrap emp-name">@fila["Nombre"]</td>
+                    <td class="text-nowrap">@fila["Telefono"]</td>
+                    <td class="text-nowrap">
+                        @(fila["FechaEntrada"] != DBNull.Value ? Convert.ToDateTime(fila["FechaEntrada"]).ToString("dd/MM/yyyy") : "")
+                    </td>
+                    <td class="text-nowrap">@fila["Direccion"]</td>
+                    <td class="text-nowrap">
+                        @(fila["FechaNacimiento"] != DBNull.Value ? Convert.ToDateTime(fila["FechaNacimiento"]).ToString("dd/MM/yyyy") : "")
+                    </td>
+                    <td>@fila["Cargo"]</td>
+                    <td>
+                        @if (fila["Estado"].ToString() == "True")
+                        {
+                            <span class="badge badge-activo">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-inactivo">Inactivo</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

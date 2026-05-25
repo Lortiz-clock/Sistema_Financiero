@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sistema Financiero</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+            :root {
+                --sidebar-width: 260px;
+                --navbar-height: 60px;
+                --primary-blue: #1e40af;
+                --bg-light: #f8fafc;
+                --text-main: #334155;
+            }
+
+            body {
+                margin: 0;
+                font-family: 'Inter', sans-serif;
+                background-color: var(--bg-light);
+                display: flex;
+            }
+
+            /* --- SIDEBAR --- */
+            .sidebar {
+                width: var(--sidebar-width);
+                height: 100vh;
+                background-color: #0f172a;
+                color: white;
+                position: fixed;
+                display: flex;
+                flex-direction: column;
+                transition: all 0.3s;
+            }
+
+            .sidebar-header {
+                padding: 20px;
+                font-weight: 700;
+                font-size: 1.2rem;
+                border-bottom: 1px solid #1e293b;
+                color: #38bdf8;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .sidebar-menu {
+                flex-grow: 1;
+                padding: 20px 0;
+                overflow-y: auto;
+            }
+
+            .menu-category {
+                padding: 10px 25px;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                color: #64748b;
+                letter-spacing: 1px;
+                font-weight: 700;
+            }
+
+            .menu-item {
+                display: flex;
+                align-items: center;
+                padding: 12px 25px;
+                color: #cbd5e1;
+                text-decoration: none;
+                transition: 0.2s;
+                gap: 12px;
+            }
+
+                .menu-item:hover {
+                    background-color: #1e293b;
+                    color: white;
+                }
+
+                .menu-item.active {
+                    background-color: var(--primary-blue);
+                    color: white;
+                }
+
+            /* --- MAIN CONTENT AREA --- */
+            .main-wrapper {
+                margin-left: var(--sidebar-width);
+                width: calc(100% - var(--sidebar-width));
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                overflow-x: hidden;
+                box-sizing: border-box;
+            }
+
+            .navbar {
+                height: var(--navbar-height);
+                background: white;
+                border-bottom: 1px solid #e2e8f0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 30px;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .user-profile-top {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: var(--text-main);
+                font-weight: 500;
+                font-size: 0.9rem;
+            }
+
+            .content-body {
+                padding: 30px;
+                flex-grow: 1;
+            }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>FINANZA PRO</span>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-category">Administración</div>
+
+            <a href="@Url.Action("Index", "Empleados")" class="menu-item">
+                <i class="fa-solid fa-users"></i> Empleados
+            </a>
+
+            @if (User.IsInRole("1"))
+            {
+                <a href="@Url.Action("Index", "Usuarios")" class="menu-item">
+                    <i class="fa-solid fa-users-gear"></i> Usuarios
+                </a>
+            }
+
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-building-user"></i> Sucursales
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-id-card"></i> Cargos
+            </a>
+
+            <div class="menu-category" style="margin-top:20px;">Operaciones</div>
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-wallet"></i> Cuentas
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fa-solid fa-money-bill-transfer"></i> Transacciones
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <header class="navbar">
+            <div style="color: #94a3b8; font-size: 0.9rem;">
+                Inicio / <strong>@ViewData["Title"]</strong>
+            </div>
+
+            <div class="user-profile-top">
+                <span>Bienvenido, <strong>@User.Identity?.Name</strong></span>
+                <a href="@Url.Action("Logout", "Account")" class="logout-top-btn" title="Cerrar Sesión">
+                    <i class="fa-solid fa-right-from-bracket" style="color: #dc2626; font-size: 1.2rem; margin-left: 10px;"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="content-body">
+            @RenderBody()
+        </main>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

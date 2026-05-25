@@ -1,28 +1,24 @@
-﻿@model System.Data.DataTable
+﻿@model IEnumerable<Sistema_Financiero.Models.EmpleadosModelo>
 
 @{
     ViewData["Title"] = "Lista de Empleados";
 }
 
 <style>
-    /* CONTENEDOR ELÁSTICO */
     .table-container {
         width: 100%;
-        max-width: 100%;
         background: #ffffff;
         padding: 16px;
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
         margin-top: 20px;
-        box-sizing: border-box;
         overflow-x: auto;
     }
 
-    /* TABLA BASE (Para monitores grandes) */
     .custom-table {
         width: 100%;
         border-collapse: collapse;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', sans-serif;
         font-size: 13px;
         color: #2d3748;
     }
@@ -30,14 +26,12 @@
         .custom-table thead tr {
             background-color: #f8f9fa;
             color: #4a5568;
-            text-align: left;
             font-weight: 600;
             border-bottom: 2px solid #edf2f7;
         }
 
-        .custom-table th,
-        .custom-table td {
-            padding: 10px 12px;
+        .custom-table th, .custom-table td {
+            padding: 12px 14px;
             vertical-align: middle;
         }
 
@@ -52,11 +46,6 @@
 
     .text-nowrap {
         white-space: nowrap;
-    }
-
-    .emp-name {
-        color: #2b6cb0;
-        font-weight: 500;
     }
 
     .badge {
@@ -78,83 +67,196 @@
         color: #e53e3e;
     }
 
-   
-
-    /* Si la pantalla es mediana o laptop estándar */
-    @@media screen and (max-width: 1300px) {
-        .custom-table {
-            font-size: 11.5px;
-        }
-
-            .custom-table th,
-            .custom-table td {
-                padding: 8px 6px;
-            }
-
-        .badge {
-            padding: 2px 6px;
-            font-size: 10px;
-        }
+    .btn-accion {
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
 
-    /* Si la pantalla es aún más pequeña (Laptops pequeñas o Tablets) */
-    @@media screen and (max-width: 1100px) {
-        .custom-table {
-            font-size: 11px;
-        }
+    .btn-editar {
+        background-color: #ebf8ff;
+        color: #2b6cb0;
+    }
 
-            .custom-table th,
-            .custom-table td {
-                padding: 6px 4px;
-            }
+    .btn-eliminar {
+        background-color: #ffeeee;
+        color: #e53e3e;
+        margin-left: 5px;
+    }
+
+    .btn-nuevo {
+        background-color: #1e40af;
+        color: white;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .search-box {
+        display: inline-flex;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 4px 10px;
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .search-input {
+        border: none;
+        outline: none;
+        padding: 4px;
+        font-size: 13px;
+        color: #2d3748;
+        width: 100%;
+    }
+
+    .search-btn {
+        background: none;
+        border: none;
+        color: #1e40af;
+        cursor: pointer;
+        padding: 0 5px;
+    }
+
+    .btn-clear {
+        color: #e53e3e;
+        text-decoration: none;
+        font-size: 11px;
+        margin-left: 5px;
+    }
+
+    /* Estilos para los textos secundarios ordenados */
+    .subtext {
+        font-size: 11px;
+        color: #718096;
+        margin-top: 2px;
+        display: block;
     }
 </style>
 
-<h2 style="font-family: 'Segoe UI', sans-serif; color: #2d3748; font-weight: 600; margin-bottom: 5px;">Lista de Empleados</h2>
-<p style="color: #718096; margin-bottom: 20px;">Gestión y control del personal activo en el sistema.</p>
+<h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:5px;">Lista de Empleados</h2>
+<p style="color:#718096;margin-bottom:20px;">Gestión de datos de empleados y cargos del sistema.</p>
+
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 15px;">
+    <div>
+        @if (User.IsInRole("Administrador"))
+        {
+            <a href="@Url.Action("Agregar", "Empleados")" class="btn-nuevo">
+                <i class="fa-solid fa-plus"></i> Nuevo Empleado
+            </a>
+        }
+    </div>
+
+    <form action="@Url.Action("Index", "Empleados")" method="GET" style="margin: 0; display: flex; align-items: center;">
+        <div class="search-box">
+            <input type="text" name="buscarNombre" class="search-input" placeholder="Buscar empleado por nombre..." value="@ViewBag.BusquedaActual" />
+            <button type="submit" class="search-btn">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+        @if (!string.IsNullOrEmpty(ViewBag.BusquedaActual))
+        {
+            <a href="@Url.Action("Index", "Empleados")" class="btn-clear" title="Limpiar búsqueda">
+                <i class="fa-solid fa-circle-xmark"></i> Limpiar
+            </a>
+        }
+    </form>
+</div>
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div style="background-color: #e6fffa; color: #00a389; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 15px; font-family: 'Segoe UI', sans-serif;">
+        <i class="fa-solid fa-circle-check"></i> @TempData["MensajeExito"]
+    </div>
+}
 
 <div class="table-container">
     <table class="custom-table">
         <thead>
             <tr>
-                <th class="text-nowrap">Código Emp.</th>
-                <th class="text-nowrap">Sucursal</th>
-                <th>Nombre</th>
-                <th class="text-nowrap">Teléfono</th>
-                <th class="text-nowrap">Fecha de Ingreso</th>
-                <th class="text-nowrap">Dirección</th>
-                <th class="text-nowrap">Fecha Nacimiento</th>
-                <th>Cargo</th>
+                <th>Código</th>
+                <th>Sucursal</th>
+                <th>Nombre / Dirección</th>
+                <th>Contacto</th>
+                <th>Puesto / Fechas</th>
                 <th>Estado</th>
+                @if (User.IsInRole("Administrador"))
+                {
+                    <th>Acciones</th>
+                }
             </tr>
         </thead>
         <tbody>
-            @foreach (System.Data.DataRow fila in Model.Rows)
+            @if (Model == null || !Model.Any())
             {
                 <tr>
-                    <td><strong>@fila["CodigoEmpleado"]</strong></td>
-                    <td>@fila["CodigoSucursal"]</td>
-                    <td class="text-nowrap emp-name">@fila["Nombre"]</td>
-                    <td class="text-nowrap">@fila["Telefono"]</td>
-                    <td class="text-nowrap">
-                        @(fila["FechaEntrada"] != DBNull.Value ? Convert.ToDateTime(fila["FechaEntrada"]).ToString("dd/MM/yyyy") : "")
-                    </td>
-                    <td class="text-nowrap">@fila["Direccion"]</td>
-                    <td class="text-nowrap">
-                        @(fila["FechaNacimiento"] != DBNull.Value ? Convert.ToDateTime(fila["FechaNacimiento"]).ToString("dd/MM/yyyy") : "")
-                    </td>
-                    <td>@fila["Cargo"]</td>
-                    <td>
-                        @if (fila["Estado"].ToString() == "True")
-                        {
-                            <span class="badge badge-activo">Activo</span>
-                        }
-                        else
-                        {
-                            <span class="badge badge-inactivo">Inactivo</span>
-                        }
-                    </td>
+                    <td colspan="7" style="text-align: center; color: #a0aec0; padding: 20px;">No se encontraron empleados.</td>
                 </tr>
+            }
+            else
+            {
+                @foreach (var emp in Model)
+                {
+                    <tr>
+                        <td><strong>@emp.CodigoEmpleado</strong></td>
+                        
+                        <td style="text-align: center; font-weight: 600; color: #4a5568;">@emp.CodigoSucursal</td>
+                        
+                        <td class="text-nowrap">
+                            <span style="font-weight: 600; color: #1a202c;">@emp.Nombre</span>
+                            <span class="subtext"><i class="fa-solid fa-location-dot" style="font-size: 10px; color: #a0aec0;"></i> @(string.IsNullOrEmpty(emp.Direccion) ? "No registrada" : emp.Direccion)</span>
+                        </td>
+                        
+                        <td>@emp.Telefono</td>
+                        
+                        <td>
+                            <span style="font-weight: 500;">@emp.Cargo</span>
+                            <span class="subtext">
+                                <i class="fa-solid fa-calendar-check" style="font-size: 10px; color: #a0aec0;"></i> Alta: @emp.FechaEntrada.ToString("dd/MM/yyyy")
+                                &nbsp;|&nbsp;
+                                <i class="fa-solid fa-cake-candles" style="font-size: 10px; color: #a0aec0;"></i> Nac: @emp.FechaNacimiento.ToString("dd/MM/yyyy")
+                            </span>
+                        </td>
+                        
+                        <td>
+                            @if (emp.Estado)
+                            {
+                                <span class="badge badge-activo">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-inactivo">Inactivo</span>
+                            }
+                        </td>
+                        
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <td class="text-nowrap">
+                                <a href="@Url.Action("Editar", "Empleados", new { id = emp.CodigoEmpleado })" class="btn-accion btn-editar">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </a>
+                                
+                                <form action="@Url.Action("Eliminar", "Empleados", new { id = emp.CodigoEmpleado })" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este empleado?')">
+                                    <button type="submit" class="btn-accion btn-eliminar">
+                                        <i class="fa-solid fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        }
+                    </tr>
+                }
             }
         </tbody>
     </table>

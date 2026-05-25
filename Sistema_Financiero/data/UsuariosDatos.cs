@@ -13,7 +13,7 @@ namespace Sistema_Financiero.data
             _conexionDatos = conexionDatos;
         }
 
-        // ── YA TENÍAS ESTE ──
+        
         public DataTable MtdValidarUsuario(string usuario, string contrasena)
         {
             DataTable dt = new DataTable();
@@ -92,7 +92,7 @@ namespace Sistema_Financiero.data
             return dt;
         }
 
-        public void MtdInsertarUsuario(UsuarioModelo u)
+        public void MtdInsertarUsuario(UsuarioModelo usuarioModelo)
         {
             try
             {
@@ -100,11 +100,11 @@ namespace Sistema_Financiero.data
                 using (SqlCommand cmd = new SqlCommand("usp_InsertarUsuario", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@CodigoEmpleado", u.CodigoEmpleado);
-                    cmd.Parameters.AddWithValue("@CodigoRol", u.CodigoRol);
-                    cmd.Parameters.AddWithValue("@Nombre", u.Nombre);
-                    cmd.Parameters.AddWithValue("@Clave", u.Clave ?? "");
-                    cmd.Parameters.AddWithValue("@Estado", u.Estado);
+                    cmd.Parameters.AddWithValue("@CodigoEmpleado", usuarioModelo.CodigoEmpleado);
+                    cmd.Parameters.AddWithValue("@CodigoRol", usuarioModelo.CodigoRol);
+                    cmd.Parameters.AddWithValue("@Nombre", usuarioModelo.Nombre);
+                    cmd.Parameters.AddWithValue("@Clave", usuarioModelo.Clave ?? "");
+                    cmd.Parameters.AddWithValue("@Estado", usuarioModelo.Estado);
                     conn.Open();
                     cmd.ExecuteNonQuery();
                 }
@@ -131,7 +131,7 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.AddWithValue("@CodigoEmpleado", u.CodigoEmpleado);
                     cmd.Parameters.AddWithValue("@CodigoRol", u.CodigoRol);
                     cmd.Parameters.AddWithValue("@Nombre", u.Nombre);
-                    cmd.Parameters.AddWithValue("Clave", string.IsNullOrEmpty(u.Clave) ? (object)DBNull.Value : u.Clave);
+                    cmd.Parameters.AddWithValue("@Clave", string.IsNullOrEmpty(u.Clave) ? (object)DBNull.Value : u.Clave);
                     cmd.Parameters.AddWithValue("@Estado", u.Estado);
                     conn.Open();
                     cmd.ExecuteNonQuery();

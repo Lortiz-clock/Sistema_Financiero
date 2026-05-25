@@ -61,7 +61,7 @@ namespace Sistema_Financiero.Controllers
                     ViewBag.Error = "Usuario o contraseña no validos";
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Captura fallas de conexión o errores internos de SQL Server
                 ViewBag.Error = "ERROR";

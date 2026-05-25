@@ -31,7 +31,7 @@
             }
 
             // ── CREAR ──
-            [Authorize(Roles = "1")] // solo Admin (CodigoRol = 1)
+            [Authorize(Roles = "Administrador")] // solo Admin (CodigoRol = 1)
             public IActionResult Crear()
             {
                 try
@@ -47,7 +47,7 @@
             }
 
             [HttpPost]
-            [Authorize(Roles = "1")]
+            [Authorize(Roles = "Administrador")]
             public IActionResult Crear(UsuarioModelo u)
             {
                 try
@@ -64,7 +64,7 @@
             }
 
             // ── EDITAR ──
-            [Authorize(Roles = "1")]
+            [Authorize(Roles = "Administrador")]
             public IActionResult Editar(int id)
             {
                 try
@@ -94,47 +94,25 @@
                 }
             }
 
-            [HttpPost]
-            [Authorize(Roles = "1")]
-            public IActionResult Editar(UsuarioModelo u)
-            {
+        [HttpPost]
+        [Authorize(Roles = "Administrador")]
+        public IActionResult Editar(UsuarioModelo u)
+        {
             try
             {
-                // Si el Administrador escribió algo en la caja de contraseña, se la asignamos al modelo
-                // Si la dejó vacía, la propiedad quedará nula o vacía y la base de datos sabrá que no debe cambiarla
-                if (!string.IsNullOrEmpty(NuevaClave))
-                {
-                    // Nota: Si tu modelo no tiene la propiedad 'Clave', puedes pasar 'NuevaClave' 
-                    // directamente como un parámetro extra a tu capa de negocio.
-                    modelo.Clave = NuevaClave;
-                }
-
-                // Llamamos a la capa de negocio enviando el modelo y la nueva clave opcional
-                bool respuesta = _usuariosNegocio.MtdActualizarUsuario(modelo, NuevaClave);
-
-                if (respuesta)
-                {
-                    // Si todo salió bien, vuelve a la lista general de usuarios
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    ViewBag.Error = "No se pudieron actualizar los datos del usuario en la base de datos.";
-                }
+                _usuariosNegocio.MtdActualizarUsuario(u);
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                // Si hay un error de SQL (como que falte el parámetro en el SP), saltará aquí y te dirá qué pasa
-                ViewBag.Error = $"Error técnico al editar: {ex.Message}";
+                ViewBag.Error = ex.Message;
+                ViewBag.Roles = _usuariosNegocio.MtdConsultarRoles();
+                return View(u);
             }
-
-            // Si hubo un error, vuelve a cargar la vista con los datos que ya tenía
-            return View(modelo);
         }
-            }
 
-            // ── ELIMINAR ──
-            [Authorize(Roles = "1")]
+        // ── ELIMINAR ──
+        [Authorize(Roles = "Administrador")]
             public IActionResult Eliminar(int id)
             {
                 try

@@ -106,7 +106,7 @@
 </h2>
 <p style="color:#718096;margin-bottom:20px;">Gestión de accesos y roles del sistema.</p>
 
-@if (User.IsInRole("1"))
+@if (User.IsInRole("Administrador"))
 {
     <a href="@Url.Action("Crear", "Usuarios")" class="btn-nuevo">
         <i class="fa-solid fa-plus"></i> Nuevo Usuario
@@ -127,7 +127,7 @@
                 <th>Usuario</th>
                 <th>Rol</th>
                 <th>Estado</th>
-                @if (User.IsInRole("1"))
+                @if (User.IsInRole("Administrador"))
                 {
                     <th>Acciones</th>
                 }
@@ -151,7 +151,7 @@
                             <span class="badge badge-inactivo">Inactivo</span>
                         }
                     </td>
-                    @if (User.IsInRole("1"))
+                    @if (User.IsInRole("Administrador"))
                     {
                         <td class="text-nowrap">
                             <a href="@Url.Action("Editar", "Usuarios", new { id = fila["CodigoUsuario"] })" class="btn-accion btn-editar">

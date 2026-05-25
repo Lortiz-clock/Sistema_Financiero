@@ -131,6 +131,7 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.AddWithValue("@CodigoEmpleado", u.CodigoEmpleado);
                     cmd.Parameters.AddWithValue("@CodigoRol", u.CodigoRol);
                     cmd.Parameters.AddWithValue("@Nombre", u.Nombre);
+                    cmd.Parameters.AddWithValue("Clave", string.IsNullOrEmpty(u.Clave) ? (object)DBNull.Value : u.Clave);
                     cmd.Parameters.AddWithValue("@Estado", u.Estado);
                     conn.Open();
                     cmd.ExecuteNonQuery();

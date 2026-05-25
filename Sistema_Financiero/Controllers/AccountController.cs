@@ -39,13 +39,13 @@ namespace Sistema_Financiero.Controllers
                 if (dtUsuario.Rows.Count > 0)
                 {
                     // Extraemos los datos reales de la consulta SQL de forma segura
-                    string nombreUsuarioReal = dtUsuario.Rows[0]["Nombre"].ToString() ?? usuario;
-                    string CodigoRol = dtUsuario.Rows[0]["CodigoRol"].ToString() ?? "3";
+                    string NombreUsuarioReal = dtUsuario.Rows[0]["Nombre"].ToString() ?? usuario;
+                    string NombreRol =   dtUsuario.Rows[0]["NombreRol"].ToString() ?? "Operador";
 
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, nombreUsuarioReal),
-                        new Claim(ClaimTypes.Role, CodigoRol)
+                        new Claim(ClaimTypes.Name, NombreUsuarioReal),
+                        new Claim(ClaimTypes.Role, NombreRol)
                     };
 
                     var identity = new ClaimsIdentity(claims, "CookieAuth");

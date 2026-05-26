@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using System.Data;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Sistema_Financiero.Services;
+using System.Data;
+using System.Security.Claims;
 
 namespace Sistema_Financiero.Controllers
 {
@@ -74,6 +75,11 @@ namespace Sistema_Financiero.Controllers
         {
             await HttpContext.SignOutAsync("CookieAuth");
             return RedirectToAction("Login");
+        }
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

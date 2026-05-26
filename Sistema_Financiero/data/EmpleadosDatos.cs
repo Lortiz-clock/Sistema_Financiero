@@ -21,7 +21,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_AgregarEmpleado"))
+                using (SqlCommand cmd = new SqlCommand("usp_AgregarEmpleado", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Nombre", empleado.Nombre);
@@ -31,12 +31,12 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.AddWithValue("@FechaNacimiento", empleado.FechaNacimiento);
                     cmd.Parameters.AddWithValue("@Cargo", empleado.Cargo);
                     cmd.Parameters.AddWithValue("@Estado", empleado.Estado);
-
-                    SqlParameter pResultado = new SqlParameter("Resultado", SqlDbType.Bit)
+                                       
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
-                    SqlParameter pMensaje = new SqlParameter("Mensaje", SqlDbType.NVarChar, 500)
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -50,13 +50,11 @@ namespace Sistema_Financiero.data
                     resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
                     MensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
-
             }
             catch (Exception ex)
             {
                 resultadofinal = false;
                 MensajeSalida = "Ocurrio un error inesperado al agregar: " + ex.Message;
-
             }
             return resultadofinal;
         }

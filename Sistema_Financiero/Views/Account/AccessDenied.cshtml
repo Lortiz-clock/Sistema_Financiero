@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Acceso Denegado";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Mantiene tu barra lateral y navbar
+}
+
+<div style="max-width: 500px; margin: 80px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+    <div style="font-size: 4rem; color: #dc2626; margin-bottom: 20px;">
+        <i class="fa-solid fa-triangle-exertion fa-shield-halved"></i>
+    </div>
+
+    <h2 style="font-family: 'Inter', sans-serif; color: #1e293b; font-weight: 700; margin-bottom: 10px;">
+        Acceso No Autorizado
+    </h2>
+
+    <p style="color: #64748b; font-size: 1rem; line-height: 1.5; margin-bottom: 30px;">
+        Lo sentimos, tu cuenta actual (**@User.Identity?.Name**) no cuenta con los privilegios necesarios para ingresar a este módulo.
+    </p>
+
+    <div style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
+        <small style="color: #94a3b8; display: block; margin-bottom: 15px;">
+            Próximamente se habilitarán tus funciones operativas.
+        </small>
+        <a href="@Url.Action("Logout", "Account")" class="btn-guardar" style="background-color: #64748b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block; transition: 0.2s;">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar Sesión
+        </a>
+    </div>
+</div>

@@ -18,6 +18,7 @@ builder.Services.AddAuthentication("CookieAuth")
     {
         options.LoginPath = "/Account/Login"; // Si intentan entrar sin permiso, los manda aquí
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20); // Tiempo de inactividad antes de cerrarse
+        options.AccessDeniedPath = "/Account/AccessDenied";
     });
 
 var app = builder.Build();

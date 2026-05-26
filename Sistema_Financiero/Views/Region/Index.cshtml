@@ -1,0 +1,173 @@
+﻿@model IEnumerable<Sistema_Financiero.Models.RegionModelo>
+
+@{
+    ViewData["Title"] = "Lista de Regiones";
+}
+
+<style>
+    .table-container {
+        width: 100%;
+        background: #ffffff;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 13px;
+        color: #2d3748;
+    }
+
+        .custom-table thead tr {
+            background-color: #f8f9fa;
+            color: #4a5568;
+            font-weight: 600;
+            border-bottom: 2px solid #edf2f7;
+        }
+
+        .custom-table th, .custom-table td {
+            padding: 10px 12px;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody tr {
+            border-bottom: 1px solid #edf2f7;
+            transition: background-color 0.15s ease;
+        }
+
+            .custom-table tbody tr:hover {
+                background-color: #f7fafc;
+            }
+
+    .text-nowrap {
+        white-space: nowrap;
+    }
+
+    .btn-accion {
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-editar {
+        background-color: #ebf8ff;
+        color: #2b6cb0;
+    }
+
+    .btn-eliminar {
+        background-color: #ffeeee;
+        color: #e53e3e;
+    }
+
+    .btn-nuevo {
+        background-color: #1e40af;
+        color: white;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    .search-container {
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        margin-bottom: 15px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .form-control-sm {
+        padding: 6px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+        font-size: 13px;
+    }
+</style>
+
+<h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:5px;">Lista de Regiones</h2>
+<p style="color:#718096;margin-bottom:20px;">Gestión de zonas geográficas y divisiones del sistema.</p>
+
+@if (User.IsInRole("Administrador"))
+{
+    <a href="@Url.Action("Crear", "Region")" class="btn-nuevo">
+        <i class="fa-solid fa-plus"></i> Nueva Región
+    </a>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert-danger" style="margin-bottom:15px; color: #e53e3e; background: #ffeeee; padding: 10px; border-radius: 6px;">@ViewBag.Error</div>
+}
+
+<div class="search-container">
+    <form action="@Url.Action("Index", "Region")" method="GET" style="display: flex; gap: 8px; width: 100%;">
+        <input type="text" name="buscarNombre" value="@ViewBag.TxtBuscar" class="form-control-sm" placeholder="Buscar región..." style="flex-grow: 1; max-width: 350px;" />
+        <button type="submit" class="btn-accion" style="background: #64748b; color: white;">Buscar</button>
+        @if (!string.IsNullOrEmpty(ViewBag.TxtBuscar))
+        {
+            <a href="@Url.Action("Index", "Region")" class="btn-accion" style="background: #e2e8f0; color: #475569; text-align:center; line-height:20px;">Limpiar</a>
+        }
+    </form>
+</div>
+
+<div class="table-container">
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre de la Región</th>
+                @if (User.IsInRole("Administrador"))
+                {
+                    <th>Acciones</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="3" style="text-align: center; color: #a0aec0; padding: 30px 0;">No se encontraron regiones registradas.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var fila in Model)
+                {
+                    <tr>
+                        <td><strong>@fila.CodigoRegion</strong></td>
+                        <td>@fila.Nombre</td>
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <td class="text-nowrap">
+                                <a href="@Url.Action("Editar", "Region", new { id = fila.CodigoRegion })" class="btn-accion btn-editar" style="margin-right: 5px;">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </a>
+                                <a href="@Url.Action("Eliminar", "Region", new { id = fila.CodigoRegion })"
+                                   class="btn-accion btn-eliminar"
+                                   onclick="return confirm('¿Estás seguro de eliminar esta región?')">
+                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

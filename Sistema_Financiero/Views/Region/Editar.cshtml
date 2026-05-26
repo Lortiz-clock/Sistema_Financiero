@@ -34,6 +34,7 @@
         font-size: 0.95rem;
         box-sizing: border-box;
         outline: none;
+        font-family: 'Segoe UI', sans-serif;
     }
 
         .form-control:focus {
@@ -68,11 +69,13 @@
 </style>
 
 <h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:5px;">Editar Región</h2>
-<p style="color:#718096;margin-bottom:20px;">Modificá los datos de la región seleccionada.</p>
+<p style="color:#718096;margin-bottom:20px;">Modificá el nombre de la región seleccionada.</p>
 
 @if (ViewBag.Error != null)
 {
-    <div class="alert-danger" style="margin-bottom:15px; color: #e53e3e; background: #ffeeee; padding: 10px; border-radius: 6px;">@ViewBag.Error</div>
+    <div style="background-color: #ffeeee; color: #e53e3e; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 15px;">
+        @ViewBag.Error
+    </div>
 }
 
 <div class="form-container">

@@ -11,22 +11,20 @@ namespace Sistema_Financiero.Logica
         {
             _regionDatos = regionDatos;
         }
-
-        public bool MtdAgregarRegion(RegionModelo region, out string MensajeSalida)
+        public string MtdAgregarRegion(RegionModelo region)
         {
             if (region == null)
-            {
-                MensajeSalida = "Los datos de la región no pueden ser nulos.";
-                return false;
-            }
-
+                throw new Exception("No se resibieron datos");
             if (string.IsNullOrWhiteSpace(region.Nombre))
+                throw new Exception("El nombre de la región no puede estar vacío.");
+            try
             {
-                MensajeSalida = "El nombre de la región es obligatorio.";
-                return false;
+                return _regionDatos.MtdAgregarRegion(region);
             }
-
-            return _regionDatos.MtdAgregarRegion(region, out MensajeSalida);
+            catch 
+            {
+                throw;
+            }
         }
 
         public List<RegionModelo> MtdConsultarRegion()
@@ -53,6 +51,24 @@ namespace Sistema_Financiero.Logica
             }
 
             return _regionDatos.MtdEliminarRegion(Codigo, out mensajeSalida);
+        }
+
+        public string MtdEditarRegion(RegionModelo region)
+        {
+            if (region == null)
+                throw new Exception("No se resibieron datos");
+            if (region.CodigoRegion <= 0)
+                throw new Exception("Debe enviar el codigo de la region");
+
+            try
+            {
+                return _regionDatos.MtdEditarRegion(region);
+            }
+            catch 
+            {
+
+                throw;
+            }
         }
     }
 }

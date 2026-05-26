@@ -15,6 +15,7 @@ builder.Services.AddScoped<UsuariosDatos>();
 builder.Services.AddTransient<RegionDatos>();
 builder.Services.AddTransient<RegionNegocio>();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddScoped<RegionNegocio>();
 
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>

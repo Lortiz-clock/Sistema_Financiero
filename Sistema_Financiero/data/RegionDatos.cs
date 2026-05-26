@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Sistema_Financiero.Models;
 using System.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Sistema_Financiero.data
 {
@@ -12,41 +13,43 @@ namespace Sistema_Financiero.data
         {
             _conexionDatos = conexionDatos;
         }
-
-        public bool MtdAgregarRegion(RegionModelo region, out string MensajeSalida)
+        
+       public string MtdAgregarRegion(RegionModelo region)
         {
-            bool resultadofinal = false;
-            MensajeSalida = "";
-
-            try
+            using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
             {
-                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                conn.Open();
+
                 using (SqlCommand cmd = new SqlCommand("usp_AgregarRegion", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
+
                     cmd.Parameters.AddWithValue("@Nombre", region.Nombre);
 
-                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit) { Direction = ParameterDirection.Output };
-                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
-
+                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
 
                     conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
-                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
+                    bool resultado = Convert.ToBoolean(pResultado.Value);
+                    string mensaje = pMensaje.Value.ToString() ?? "Sin mensaje del servidor";
+                    if (!resultado)
+                        throw new ApplicationException(mensaje);
+
+                    return mensaje;
                 }
             }
-            catch (Exception ex)
-            {
-                resultadofinal = false;
-                MensajeSalida = "Ocurrio un error inesperado al agregar: " + ex.Message;
-            }
-            return resultadofinal;
         }
-
         public List<RegionModelo> MtdConsultarRegion()
         {
             var lista = new List<RegionModelo>();
@@ -141,5 +144,44 @@ namespace Sistema_Financiero.data
             }
             return resultadoFinal;
         }
+
+        public string MtdEditarRegion(RegionModelo region)
+        {
+            using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = new SqlCommand("usp_EditarRegion", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@CodigoRegion", region.CodigoRegion);
+                    cmd.Parameters.AddWithValue("Nombre", region.Nombre);
+
+                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(pResultado);
+                    cmd.Parameters.Add(pMensaje);
+
+                    cmd.ExecuteNonQuery();
+
+                    bool resultado = Convert.ToBoolean(pResultado.Value);
+                    string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje del servidor";
+
+                    if (!resultado)
+                        throw new ApplicationException(mensaje);
+                    return mensaje;
+                }
+            }
+        }
+
     }
 }

@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System.Data;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Sistema_Financiero.Logica;
 using Sistema_Financiero.Models;
+using Sistema_Financiero.Services;
+using System.Data;
 
 namespace Sistema_Financiero.Controllers
 {
@@ -15,31 +16,33 @@ namespace Sistema_Financiero.Controllers
             _regionNegocio = regionNegocio;
         }
 
-        // ── CONSULTAR (Todos los roles autenticados ven esto) ──
+        // ── CONSULTAR ──
         [Authorize]
         public IActionResult Index(string buscarNombre)
         {
+            buscarNombre ??= string.Empty;
+
             try
             {
-                // Reutilizamos tu lógica de negocio que devuelve List<RegionModelo>
                 var lista = _regionNegocio.MtdBuscarRegion(buscarNombre);
-                ViewBag.TxtBuscar = buscarNombre;
+                ViewBag.BusquedaActual = buscarNombre; // Usando tu estándar de Empleados
                 return View(lista);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ViewBag.Error = ex.Message;
+                ViewBag.Error = "ERROR al cargar las regiones";
                 return View(new List<RegionModelo>());
             }
         }
 
-        // ── CREAR (Solo Administrador) ──
+        // ── CREAR (GET) ──
         [Authorize(Roles = "Administrador")]
         public IActionResult Crear()
         {
             return View(new RegionModelo());
         }
 
+        // ── CREAR (POST) ──
         [HttpPost]
         [Authorize(Roles = "Administrador")]
         [ValidateAntiForgeryToken]
@@ -47,45 +50,54 @@ namespace Sistema_Financiero.Controllers
         {
             try
             {
-                string mensaje;
-                bool exito = _regionNegocio.MtdAgregarRegion(region, out mensaje);
+                // INTEGRACIÓN PERFECTA CON TU LÓGICA:
+                // Llama a tu método real que recibe 1 solo argumento y devuelve un string.
+                string mensajeExito = _regionNegocio.MtdAgregarRegion(region);
 
-                if (exito)
-                {
-                    return RedirectToAction("Index");
-                }
-
-                ViewBag.Error = mensaje;
-                return View(region);
+                TempData["MensajeExito"] = "Región creada con éxito";
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
+                // Si salta un throw ("No se recibieron datos" o "El nombre no puede estar vacío")
+                // lo atrapamos limpiamente aquí para mostrarlo en la vista.
                 ViewBag.Error = ex.Message;
                 return View(region);
             }
         }
-
-        // ── EDITAR (Solo Administrador) ──
+        // ── EDITAR (GET) ──
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
             try
             {
-                // Buscamos la región por su ID filtrando en la lista existente
-                var region = _regionNegocio.MtdBuscarRegion("")
-                    .FirstOrDefault(r => r.CodigoRegion == id);
+                var listaRegiones = _regionNegocio.MtdBuscarRegion("");
+                RegionModelo? regionSeleccionada = null;
 
-                if (region == null) return RedirectToAction("Index");
+                foreach (var r in listaRegiones)
+                {
+                    if (r.CodigoRegion == id)
+                    {
+                        regionSeleccionada = r;
+                        break;
+                    }
+                }
 
-                return View(region);
+                if (regionSeleccionada == null)
+                {
+                    return RedirectToAction("Index");
+                }
+
+                return View(regionSeleccionada);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ViewBag.Error = ex.Message;
+                ViewBag.Error = "ERROR al cargar la región seleccionada";
                 return RedirectToAction("Index");
             }
         }
 
+        // ── EDITAR (POST) ──
         [HttpPost]
         [Authorize(Roles = "Administrador")]
         [ValidateAntiForgeryToken]
@@ -93,17 +105,9 @@ namespace Sistema_Financiero.Controllers
         {
             try
             {
-                string mensaje;
-                // Reutiliza MtdAgregarRegion para evitar el error de compilación CS1061
-                bool exito = _regionNegocio.MtdAgregarRegion(region, out mensaje);
-
-                if (exito)
-                {
-                    return RedirectToAction("Index");
-                }
-
-                ViewBag.Error = mensaje;
-                return View(region);
+                string mensajeExito = _regionNegocio.MtdEditarRegion(region);
+                TempData["MensajeExito"] = "Región actualizada con éxito";
+                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
@@ -112,21 +116,24 @@ namespace Sistema_Financiero.Controllers
             }
         }
 
-        // ── ELIMINAR (Solo Administrador) ──
+        // ── ELIMINAR ──
+        [HttpPost]
         [Authorize(Roles = "Administrador")]
+        [ValidateAntiForgeryToken]
         public IActionResult Eliminar(int id)
         {
             try
             {
                 string mensaje;
                 _regionNegocio.MtdEliminarRegion(id, out mensaje);
-                return RedirectToAction("Index");
+                TempData["MensajeExito"] = "Región eliminada con éxito";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ViewBag.Error = ex.Message;
-                return RedirectToAction("Index");
+                ViewBag.Error = "ERROR al eliminar la región";
             }
+
+            return RedirectToAction("Index");
         }
     }
 }

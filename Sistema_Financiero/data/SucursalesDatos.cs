@@ -146,12 +146,69 @@ namespace Sistema_Financiero.data
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("CodigoSucursal", CodigoSucursal);
-                    var pResultado = new SqlParameter("Resultado", SqlDbType.Bit)
+                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
-                    }
+                    };
+
+                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(pResultado);
+                    cmd.Parameters.Add(pMensaje);
+
+                    cmd.ExecuteNonQuery();
+
+                    bool resultado = Convert.ToBoolean(pResultado.Value);
+                    string mensaje = pMensaje.Value.ToString() ?? "Sin mensaje del servidor";
+
+                    if (!resultado)
+                        throw new Exception(mensaje);
+                    return mensaje;
+ 
+                        
                 }
             }
         }
+
+        public List<SucursalesModelo> MtdBuscarSucursal(string nombre)
+        {
+            var lista = new List<SucursalesModelo>();
+            try
+            {
+                using (SqlConnection conn = conexion.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("usp_BuscarEmpleado", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Nombre", nombre ?? "");
+
+                    conn.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new SucursalesModelo
+                            {                                
+                                CodigoSucursal = dr["CodigoSucursal"] != DBNull.Value ? Convert.ToInt32(dr["CodigoSucursal"]) : 0,
+                                CodigoMunicipio = dr["CodigoMunicipio"] != DBNull.Value ? Convert.ToInt32(dr["CodigoSucursal"]) : 0,
+                                Nombre = dr["Nombre"].ToString(),
+                                Direccion = dr["Direccion"].ToString(),
+                                Telefono = dr["Telefono"].ToString(),
+                                Estado = Convert.ToBoolean(dr["Estado"]),
+                                
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error en Datos al buscar sucursal: " + ex.Message);
+            }
+            return lista;
+        }
+
     }
 }

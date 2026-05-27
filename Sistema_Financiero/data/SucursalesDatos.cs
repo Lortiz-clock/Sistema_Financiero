@@ -12,6 +12,43 @@ namespace Sistema_Financiero.data
             conexion = conexionDatos;
         }
 
+        public List<SucursalesModelo> MtdConsultarSucursal()
+        {
+            var lista = new List<SucursalesModelo>();
+
+            try
+            {
+                using (SqlConnection conn = conexion.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("usp_ConsultarSucursales", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    conn.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                       while (dr.Read())
+                    {
+                            lista.Add(new SucursalesModelo
+                            {
+                                CodigoSucursal = Convert.ToInt32(dr["CodigoSucursal"]),
+                                CodigoMunicipio = dr["CodigoMunicipio"] != DBNull.Value ? Convert.ToInt32(dr["CodigoMunicipio"]) : 0,
+                                Nombre = dr["Nombre"].ToString(),
+                                Direccion = dr["Direccion"].ToString(),
+                                Telefono = dr["Telefono"].ToString(),
+                                Estado = Convert.ToBoolean(dr["Estado"])
+                            });
+                    }
+                }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("Error en datos al consultar sucursales: " + ex.Message);
+            }
+            return lista;
+        }
+       
+
         public bool MtdAgregarSucursal(SucursalesModelo sucursal, out string MensajeSalida)
         {
             bool resultadofinal = false;
@@ -20,21 +57,21 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = conexion.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_AgregarSucursal"))
+                using (SqlCommand cmd = new SqlCommand("usp_AgregarSucursal", conn))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@CodigoMunicipio", sucursal.CodigoMunicipio);
                     cmd.Parameters.AddWithValue("@Nombre", sucursal.Nombre);
                     cmd.Parameters.AddWithValue("@Direccion", sucursal.Direccion);
                     cmd.Parameters.AddWithValue("@Telefono", sucursal.Telefono);
-                    cmd.Parameters.AddWithValue("@Estado", sucursal.Estado);
+                    cmd.Parameters.AddWithValue("@Estado", sucursal.Estado ?? false);
 
                     SqlParameter pResultado = new SqlParameter("@Resultado", System.Data.SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
 
-                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar)
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -45,7 +82,16 @@ namespace Sistema_Financiero.data
                     conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    if (pResultado.Value != DBNull.Value && pResultado.Value != null)
+                    {
+                        resultadofinal = Convert.ToBoolean(pResultado.Value);
+                    }
+                    else
+                    {
+                        resultadofinal = false;
+                    }
+
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
                     MensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
             }
@@ -57,45 +103,8 @@ namespace Sistema_Financiero.data
             }
             return resultadofinal;
         }
-        public string MtdAgregarSucursal(SucursalesModelo sucursal)
-        {
-            using(SqlConnection conn = conexion.MtdConexionBDD())
-            {
-                conn.Open();
-
-                using (SqlCommand cmd = new SqlCommand("usp_AgregarSucursal"))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("@Nombre", sucursal.Nombre);
-                    cmd.Parameters.AddWithValue("@Direccion", sucursal.Direccion);
-                    cmd.Parameters.AddWithValue("@Telefono", sucursal.Telefono);
-                    cmd.Parameters.AddWithValue("@Estado", sucursal.Estado);
-
-                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-
-                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-
-                    cmd.Parameters.Add(pResultado);
-                    cmd.Parameters.Add(pMensaje);
-                    cmd.ExecuteNonQuery();
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje  del servidor";
-                    if (!resultado)
-                        throw new Exception(mensaje);
-
-                    return mensaje;
-                }
-            }
-        }
-
-        public string mtdEditarSucursal(SucursalesModelo sucursal)
+       
+        public string MtdEditarSucursal(SucursalesModelo sucursal, out string MensajeSalida)
         {
             using (SqlConnection conn = conexion.MtdConexionBDD())
             {
@@ -108,14 +117,14 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.AddWithValue("@Nombre", sucursal.Nombre);
                     cmd.Parameters.AddWithValue("@Direccion", sucursal.Direccion);
                     cmd.Parameters.AddWithValue("@Telefono", sucursal.Telefono);
-                    cmd.Parameters.AddWithValue("@Estado", sucursal);
+                    cmd.Parameters.AddWithValue("@Estado", sucursal.Estado);
 
                     var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
 
-                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar)
+                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -128,8 +137,8 @@ namespace Sistema_Financiero.data
                     bool resultado = Convert.ToBoolean(pResultado.Value);
                     string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje del servidor";
 
-                    if (!resultado)
-                        throw new Exception(mensaje);
+                    MensajeSalida = mensaje;
+
                     return mensaje;
                 }
             }

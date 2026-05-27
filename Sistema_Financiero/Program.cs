@@ -1,17 +1,21 @@
 using Sistema_Financiero.data;
 using Sistema_Financiero.Services;
 using Sistema_Financiero.Logica;
+using Sistema_Financiero.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+
 builder.Services.AddScoped<ConexionDatos>();
 builder.Services.AddScoped<EmpleadosDatos>();
 builder.Services.AddScoped<EmpleadosNegocio>();
 builder.Services.AddScoped<UsuariosNegocio>();
 builder.Services.AddScoped<UsuariosDatos>();
+builder.Services.AddScoped<SucursalesDatos>();
+builder.Services.AddScoped<SucursalesNegocio>();
 builder.Services.AddTransient<RegionDatos>();
 builder.Services.AddTransient<RegionNegocio>();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();

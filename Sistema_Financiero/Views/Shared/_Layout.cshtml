@@ -143,15 +143,15 @@
                 </a>
             }
 
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-building-user"></i> Sucursales
-            </a>
-            <a href="#" class="menu-item">
-                <i class="fa-solid fa-id-card"></i> Cargos
-            </a>
+            <li class="nav-item">
+                <a asp-controller="Sucursales" asp-action="Index" class="menu-item">
+                    <i class="fa-solid fa-building"></i> Sucursales
+                </a>
+            </li>
+           
 
-            <a href="@Url.Action("Index", "Region")" style="color: white; text-decoration: none; display: block; padding: 10px 15px; font-family: 'Segoe UI', sans-serif; font-size: 13px;">
-                <i class="fa-solid fa-earth-americas" style="margin-right: 8px;"></i> Regiones
+            <a href="@Url.Action("Index", "Region")" class="menu-item">
+                <i class="fa-solid fa-earth-americas"></i> Regiones
             </a>
 
             <div class="menu-category" style="margin-top:20px;">Operaciones</div>

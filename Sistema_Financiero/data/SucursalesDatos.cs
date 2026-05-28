@@ -38,7 +38,7 @@ namespace Sistema_Financiero.data
                             });
                     }
                 }
-                }
+                       }
             }
             catch (Exception ex)
             {
@@ -92,7 +92,8 @@ namespace Sistema_Financiero.data
                     }
 
                     MensajeSalida = pMensaje.Value?.ToString() ?? "";
-                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
+
+                    
                 }
             }
             catch (Exception ex)

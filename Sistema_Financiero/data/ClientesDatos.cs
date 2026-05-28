@@ -19,8 +19,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = conexion.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("", conn))        //pendiente nombre proceso almacenado
-                    {
+                using (SqlCommand cmd = new SqlCommand("usp_ConsultarClientes", conn))                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
                         conn.Open();
                         using (SqlDataReader dr = cmd.ExecuteReader())
@@ -58,7 +57,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = conexion.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("", conn))//falta agregar nombre de proceso
+                using (SqlCommand cmd = new SqlCommand("usp_AgregarClientes", conn))
                 {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@CodigoMunicipio", cliente.CodigoMunicipio);
@@ -101,12 +100,12 @@ namespace Sistema_Financiero.data
             return resultadofinal;
         }
 
-        public string MtdEditarCliente(ClientesModelo cliente, out string MensajeSalida)
+        public string MtdActualizarCliente(ClientesModelo cliente, out string MensajeSalida)
         {
             using (SqlConnection conn = conexion.MtdConexionBDD())
             {
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand("", conn)) //falta el proceso 
+                using (SqlCommand cmd = new SqlCommand("usp_ActualizarCliente", conn)) //falta el proceso 
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Nombre", cliente.Nombre);
@@ -147,7 +146,7 @@ namespace Sistema_Financiero.data
             using (SqlConnection conn = conexion.MtdConexionBDD())
             {
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand("", conn)) //agregar proseco
+                using (SqlCommand cmd = new SqlCommand("usp_EliminarClientes", conn)) //agregar proseco
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -183,7 +182,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = conexion.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("", conn))// falta proceso almacenado
+                using (SqlCommand cmd = new SqlCommand("usp_BuscarClientes]", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 

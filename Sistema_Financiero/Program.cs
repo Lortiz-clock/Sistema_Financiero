@@ -10,6 +10,8 @@ builder.Services.AddControllersWithViews();
 
 
 builder.Services.AddScoped<ConexionDatos>();
+builder.Services.AddScoped<ClientesDatos>();
+builder.Services.AddScoped<ClientesNegocio>();
 builder.Services.AddScoped<EmpleadosDatos>();
 builder.Services.AddScoped<EmpleadosNegocio>();
 builder.Services.AddScoped<UsuariosNegocio>();

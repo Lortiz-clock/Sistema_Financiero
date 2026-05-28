@@ -1,0 +1,80 @@
+﻿@model Sistema_Financiero.Models.ClientesModelo
+
+@{
+    ViewData["Title"] = "Nuevo Cliente";
+}
+
+<style>
+    .form-container { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); max-width: 600px; margin-top: 20px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 6px; color: #475569; font-size: 0.85rem; font-weight: 500; }
+    .form-control { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none; font-family: 'Segoe UI', sans-serif; }
+    .form-control:focus { border-color: #2b6cb0; box-shadow: 0 0 0 4px rgba(43,108,176,0.1); }
+    .form-row { display: flex; gap: 15px; }
+    .form-row .form-group { flex: 1; }
+    .btn-guardar { background: #1e40af; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+    .btn-cancelar { background: #f1f5f9; color: #475569; border: none; padding: 10px 24px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; margin-left: 10px; }
+</style>
+
+<h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:5px;">Nuevo Cliente</h2>
+<p style="color:#718096;margin-bottom:20px;">Completá los datos para registrar un nuevo cliente en el sistema.</p>
+
+@if (ViewBag.Error != null)
+{
+    <div style="background-color: #ffeeee; color: #e53e3e; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 15px;">
+        @ViewBag.Error
+    </div>
+}
+
+<div class="form-container">
+    <form action="@Url.Action("Agregar", "Clientes")" method="POST">
+
+        <div class="form-group">
+            <label>Nombre Completo / Razón Social</label>
+            <input type="text" name="Nombre" class="form-control" placeholder="ej: Juan Pérez o Empresa S.A." required />
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>DPI</label>
+                <input type="text" name="DPI" class="form-control" placeholder="Número de DPI" required />
+            </div>
+            <div class="form-group">
+                <label>NIT</label>
+                <input type="text" name="NIT" class="form-control" placeholder="Número de NIT" required />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" name="Telefono" class="form-control" placeholder="ej: 5544-3322" required />
+            </div>
+            <div class="form-group">
+                <label>Código Municipio</label>
+                <input type="number" name="CodigoMunicipio" class="form-control" placeholder="ej: 1" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Correo Electrónico</label>
+            <input type="email" name="Correo" class="form-control" placeholder="ej: cliente@correo.com" required />
+        </div>
+
+        <div class="form-group">
+            <label>Dirección de Residencia</label>
+            <input type="text" name="Direccion" class="form-control" placeholder="Dirección física completa..." required />
+        </div>
+
+        <div class="form-group">
+            <label>Tipo de Cliente</label>
+            <select name="Tipo" class="form-control">
+                <option value="Individual">Individual</option>
+                <option value="Juridico">Jurídico</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-guardar">Guardar Cliente</button>
+        <a href="@Url.Action("Index", "Clientes")" class="btn-cancelar">Cancelar</a>
+    </form>
+</div>

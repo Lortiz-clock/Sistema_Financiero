@@ -38,7 +38,7 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
 
-                    conn.Open();
+                    
                     cmd.ExecuteNonQuery();
 
                     bool resultado = Convert.ToBoolean(pResultado.Value);
@@ -151,7 +151,7 @@ namespace Sistema_Financiero.data
             {
                 conn.Open();
 
-                using (SqlCommand cmd = new SqlCommand("usp_EditarRegion", conn))
+                using (SqlCommand cmd = new SqlCommand("usp_ActualizarRegion", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 

@@ -21,9 +21,10 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_AgregarEmpleado", conn))
+                using (SqlCommand cmd = new SqlCommand("usp_AgregarEmpleados", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@CodigoSucursal", empleado.CodigoSucursal);
                     cmd.Parameters.AddWithValue("@Nombre", empleado.Nombre);
                     cmd.Parameters.AddWithValue("@Telefono", empleado.Telefono);
                     cmd.Parameters.AddWithValue("@FechaEntrada", empleado.FechaEntrada);
@@ -65,7 +66,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_ConsultarEmpleado", conn))
+                using (SqlCommand cmd = new SqlCommand("usp_ConsultarEmpleados", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     conn.Open();

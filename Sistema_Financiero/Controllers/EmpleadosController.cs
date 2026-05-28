@@ -9,10 +9,14 @@ namespace Sistema_Financiero.Controllers
     public class EmpleadosController : Controller
     {
         private readonly EmpleadosNegocio _empleadosNegocio;
+        // 1. Declaramos el servicio de Sucursales para poder consultar la lista
+        private readonly SucursalesNegocio _sucursalesNegocio;
 
-        public EmpleadosController(EmpleadosNegocio empleadosNegocio)
+        // 2. Lo agregamos al constructor para que ASP.NET Core lo inyecte automáticamente
+        public EmpleadosController(EmpleadosNegocio empleadosNegocio, SucursalesNegocio sucursalesNegocio)
         {
             _empleadosNegocio = empleadosNegocio;
+            _sucursalesNegocio = sucursalesNegocio;
         }
 
         // =========================================================================
@@ -22,16 +26,13 @@ namespace Sistema_Financiero.Controllers
         {
             List<EmpleadosModelo> empleados;
 
-            // Si el cuadro de texto no está vacío, usamos tu SP de Buscar
             if (!string.IsNullOrEmpty(buscarNombre))
             {
                 empleados = _empleadosNegocio.MtdBuscarEmpleado(buscarNombre);
-                // Guardamos lo que buscó el usuario para volverlo a pintar en la barra de texto
                 ViewBag.BusquedaActual = buscarNombre;
             }
             else
             {
-                // Si está vacío, cargamos la lista completa con tu SP de Consultar
                 empleados = _empleadosNegocio.MtdConsultarEmpleados();
             }
 
@@ -44,6 +45,8 @@ namespace Sistema_Financiero.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Agregar()
         {
+            // 3. Cargamos las sucursales antes de abrir la vista de Agregar
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
             return View();
         }
 
@@ -51,7 +54,12 @@ namespace Sistema_Financiero.Controllers
         [HttpPost]
         public IActionResult Agregar(EmpleadosModelo empleado)
         {
-            if (!ModelState.IsValid) return View(empleado);
+            if (!ModelState.IsValid)
+            {
+                // Si el modelo es inválido, debemos recargar las sucursales antes de retornar la vista
+                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+                return View(empleado);
+            }
 
             bool exito = _empleadosNegocio.MtdAgregarEmpleado(empleado, out string mensajeBDD);
 
@@ -61,6 +69,8 @@ namespace Sistema_Financiero.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Si falla la base de datos, también recargamos las sucursales
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
             ViewBag.Error = mensajeBDD;
             return View(empleado);
         }
@@ -71,7 +81,6 @@ namespace Sistema_Financiero.Controllers
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
-            // Buscamos al empleado para cargar sus datos en el formulario
             var empleado = _empleadosNegocio.MtdConsultarEmpleados()
                 .Find(e => e.CodigoEmpleado == id);
 
@@ -81,6 +90,8 @@ namespace Sistema_Financiero.Controllers
                 return RedirectToAction("Index");
             }
 
+            // 4. Cargamos las sucursales también en la vista de Editar para poder reasignar sucursal si se requiere
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
             return View(empleado);
         }
 
@@ -88,7 +99,11 @@ namespace Sistema_Financiero.Controllers
         [HttpPost]
         public IActionResult Editar(EmpleadosModelo empleado)
         {
-            if (!ModelState.IsValid) return View(empleado);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+                return View(empleado);
+            }
 
             bool exito = _empleadosNegocio.MtdActualizarEmpleado(empleado, out string mensajeBDD);
 
@@ -98,6 +113,7 @@ namespace Sistema_Financiero.Controllers
                 return RedirectToAction("Index");
             }
 
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
             ViewBag.Error = mensajeBDD;
             return View(empleado);
         }

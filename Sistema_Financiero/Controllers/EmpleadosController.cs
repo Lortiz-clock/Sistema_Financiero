@@ -46,7 +46,7 @@ namespace Sistema_Financiero.Controllers
         public IActionResult Agregar()
         {
             // 3. Cargamos las sucursales antes de abrir la vista de Agregar
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
             return View();
         }
 
@@ -57,7 +57,7 @@ namespace Sistema_Financiero.Controllers
             if (!ModelState.IsValid)
             {
                 // Si el modelo es inválido, debemos recargar las sucursales antes de retornar la vista
-                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
                 return View(empleado);
             }
 
@@ -70,7 +70,7 @@ namespace Sistema_Financiero.Controllers
             }
 
             // Si falla la base de datos, también recargamos las sucursales
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
             ViewBag.Error = mensajeBDD;
             return View(empleado);
         }
@@ -91,7 +91,7 @@ namespace Sistema_Financiero.Controllers
             }
 
             // 4. Cargamos las sucursales también en la vista de Editar para poder reasignar sucursal si se requiere
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
             return View(empleado);
         }
 
@@ -101,7 +101,7 @@ namespace Sistema_Financiero.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
                 return View(empleado);
             }
 
@@ -113,7 +113,7 @@ namespace Sistema_Financiero.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursales();
+            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
             ViewBag.Error = mensajeBDD;
             return View(empleado);
         }

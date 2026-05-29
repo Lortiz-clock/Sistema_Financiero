@@ -7,39 +7,42 @@ namespace Sistema_Financiero.data
 {
     public class ClientesDatos
     {
-        private readonly ConexionDatos conexion;
+        private readonly ConexionDatos _conexionDatos;
         public ClientesDatos(ConexionDatos conexionDatos)
         {
-            conexion = conexionDatos;
+            _conexionDatos = conexionDatos;
         }
 
-        public List<ClientesModelo> MtdConsultarCliente()
+        public List<ClientesModelo> MtdConsultarCliente( string nombre)
         {
             var lista = new List<ClientesModelo>();
             try
             {
-                using (SqlConnection conn = conexion.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_ConsultarClientes", conn))                     {
-                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        conn.Open();
-                        using (SqlDataReader dr = cmd.ExecuteReader())
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("usp_ConsultarClientes", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Nombre", nombre ?? "");
+
+                    conn.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
                         {
-                            while (dr.Read())
+                            lista.Add(new ClientesModelo
                             {
-                                lista.Add(new ClientesModelo
-                                {
-                                    CodigoCliente = Convert.ToInt32(dr["CodigoCliente"]),
-                                    CodigoMunicipio = dr["CodigoMunicipio"] != DBNull.Value ? Convert.ToInt32(dr["CodigoMunicipio"]) : 0,
-                                    Nombre = dr["Nombre"].ToString() ??"",
-                                    DPI = dr["DPI"].ToString() ?? "",
-                                    NIT = dr["NIT"].ToString() ?? "",
-                                    Correo= dr["Correo"].ToString() ?? "",
-                                    Direccion = dr["Direccion"].ToString() ?? "",
-                                    Tipo = dr["Tipo"].ToString() ?? ""
-                                });
-                            }
+                                CodigoCliente = Convert.ToInt32(dr["CodigoCliente"]),
+                                CodigoMunicipio = dr["CodigoMunicipio"] != DBNull.Value ? Convert.ToInt32(dr["CodigoMunicipio"]) : 0,
+                                Nombre = dr["Nombre"].ToString() ?? "",
+                                DPI = dr["DPI"].ToString() ?? "",
+                                NIT = dr["NIT"].ToString() ?? "",
+                                Correo = dr["Correo"].ToString() ?? "",
+                                Direccion = dr["Direccion"].ToString() ?? "",
+                                Tipo = dr["Tipo"].ToString() ?? ""
+                            });
                         }
                     }
+                }
                  
             }
             catch (Exception ex)
@@ -56,10 +59,10 @@ namespace Sistema_Financiero.data
             MensajeSalidad = "";
             try
             {
-                using (SqlConnection conn = conexion.MtdConexionBDD())
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
                 using (SqlCommand cmd = new SqlCommand("usp_AgregarClientes", conn))
                 {
-                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                        cmd.CommandType =CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@CodigoMunicipio", cliente.CodigoMunicipio);
                         cmd.Parameters.AddWithValue("@Nombre", cliente.Nombre);
                         cmd.Parameters.AddWithValue("@DPI", cliente.DPI);
@@ -69,7 +72,7 @@ namespace Sistema_Financiero.data
                         cmd.Parameters.AddWithValue("@Direccion", cliente.Direccion);
                         cmd.Parameters.AddWithValue("@Tipo", cliente.Tipo);
 
-                        SqlParameter pResultado = new SqlParameter("@Resultado", System.Data.SqlDbType.Bit)
+                        SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                         {
                             Direction = ParameterDirection.Output
                         };
@@ -80,12 +83,11 @@ namespace Sistema_Financiero.data
 
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
+
                     conn.Open();
                     cmd.ExecuteNonQuery();
-                    if (pResultado.Value != DBNull.Value && pResultado.Value != null)
-                    {
-                        resultadofinal = false;
-                    }
+
+                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
                     MensajeSalidad = pMensaje.Value?.ToString() ?? "";
                     
                 }
@@ -100,27 +102,75 @@ namespace Sistema_Financiero.data
             return resultadofinal;
         }
 
-        public string MtdActualizarCliente(ClientesModelo cliente, out string MensajeSalida)
+        public bool MtdActualizarCliente(ClientesModelo cliente, out string MensajeSalida)
         {
-            using (SqlConnection conn = conexion.MtdConexionBDD())
+            bool resultadofinal = false;
+            MensajeSalida = "";
+
+            try
             {
-                conn.Open();
-                using (SqlCommand cmd = new SqlCommand("usp_ActualizarCliente", conn)) //falta el proceso 
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("usp_ActualizarCliente", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Nombre", cliente.Nombre);
-                    cmd.Parameters.AddWithValue("@DPI", cliente.DPI);
-                    cmd.Parameters.AddWithValue("@NIT", cliente.NIT);
-                    cmd.Parameters.AddWithValue("@Telefono", cliente.Telefono);
-                    cmd.Parameters.AddWithValue("@Correo", cliente.Correo);
-                    cmd.Parameters.AddWithValue("@Direccion", cliente.Direccion);
-                    cmd.Parameters.AddWithValue("@Tipo", cliente.Tipo);
+                    cmd.Parameters.AddWithValue("CodigoCliente", cliente.CodigoCliente);
+                    cmd.Parameters.AddWithValue("CodigoMunicipio", cliente.CodigoMunicipio);
+                    cmd.Parameters.AddWithValue("Nombre", cliente.Nombre);
+                    cmd.Parameters.AddWithValue("DPI", cliente.DPI);
+                    cmd.Parameters.AddWithValue("NIT", cliente.NIT);
+                    cmd.Parameters.AddWithValue("Telefono",cliente.Telefono);
+                    cmd.Parameters.AddWithValue("Correo", cliente.Correo);
+                    cmd.Parameters.AddWithValue("Direccion", cliente.Direccion);
+                    cmd.Parameters.AddWithValue("Tipo", cliente.Tipo);
 
-                    var pResultado = new SqlParameter("Resultado", SqlDbType.Bit)
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
-                    var pMensaje = new SqlParameter("Mensaje", SqlDbType.NVarChar, 500)
+
+                    SqlParameter pmensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(pResultado);
+                    cmd.Parameters.Add(pmensaje);
+
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+
+                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    MensajeSalida = pmensaje.Value?.ToString() ?? "";
+                }
+            }
+            catch (Exception ex)
+            {
+
+                resultadofinal = false;
+                MensajeSalida = "Ocurrio un error inesperado: " + ex.Message;
+            }
+
+            return resultadofinal;
+        }
+
+        public bool MtdEliminarCliente(int Codigo, out string MensajeSalida)
+        {
+            bool resultadoFinal = false;
+            MensajeSalida = "";
+            try
+            {
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("[usp_EliminarClientes", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@CodigoCliente", Codigo);
+
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -128,60 +178,27 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
 
+                    conn.Open();
                     cmd.ExecuteNonQuery();
-
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value?.ToString() ?? "Sin mensajes del servidor";
-
-                    MensajeSalida = mensaje;
-
-                    return mensaje;
+                    resultadoFinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
-                
             }
-        }
-
-        public string MtdEliminarCliente(int CodigoCliente)
-        {
-            using (SqlConnection conn = conexion.MtdConexionBDD())
+            catch (Exception ex)
             {
-                conn.Open();
-                using (SqlCommand cmd = new SqlCommand("usp_EliminarClientes", conn)) //agregar proseco
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
-                    cmd.Parameters.AddWithValue("CodigoCliente", CodigoCliente);
-                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
-                    {
-                        Direction = ParameterDirection.Output
-
-                    };
-
-                    cmd.Parameters.Add(pResultado);
-                    cmd.Parameters.Add(pMensaje);
-
-                    cmd.ExecuteNonQuery();
-
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value.ToString() ?? "Sin mensaje del servidor";
-
-                    if (!resultado)
-                        throw new Exception(mensaje);
-                    return mensaje;
-                }
+                resultadoFinal = false;
+                MensajeSalida = "Ocurrion un error inesperado al eliminar: " + ex.Message;
+                throw;
             }
+            return resultadoFinal;
         }
 
-        public List<ClientesModelo> MtdBuscarCliente(string nombre)
+        public List<ClientesModelo> MtdBuscarCliente()
         {
             var lista = new List<ClientesModelo>();
             try
             {
-                using (SqlConnection conn = conexion.MtdConexionBDD())
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
                 using (SqlCommand cmd = new SqlCommand("usp_BuscarClientes]", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -202,8 +219,6 @@ namespace Sistema_Financiero.data
                                 Telefono = dr["Telefono"].ToString()!,
                                 Correo = dr["Correo"].ToString()!,
                                 Direccion = dr["Direccion"].ToString()!,
-
-
 
                             });
                         }

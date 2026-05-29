@@ -6,9 +6,8 @@ namespace Sistema_Financiero.Services
     public class ClientesNegocio
     {
         private readonly ClientesDatos _clientesDatos;
-        private readonly MunicipioDatos _municipioDatos; // ◄ Agregamos la conexión a los datos de municipio
-
-        // El constructor ahora recibe ambas clases de datos de forma limpia
+        private readonly MunicipioDatos _municipioDatos;
+        
         public ClientesNegocio(ClientesDatos clientesDatos, MunicipioDatos municipioDatos)
         {
             _clientesDatos = clientesDatos;
@@ -20,25 +19,24 @@ namespace Sistema_Financiero.Services
             return _clientesDatos.MtdAgregarCliente(clientes, out MensajeSalida);
         }
 
-        public string MtdActualizarCliente(ClientesModelo clientes, out string MensajeSalida)
+        public bool MtdActualizarCliente(ClientesModelo clientes, out string MensajeSalida)
         {
             return _clientesDatos.MtdActualizarCliente(clientes, out MensajeSalida);
         }
 
-        public string MtdEliminarCliente(int CodigoCliente)
+        public bool MtdEliminarCliente(int CodigoCliente, out string MensajesSalida)
         {
-            return _clientesDatos.MtdEliminarCliente(CodigoCliente);
+            return _clientesDatos.MtdEliminarCliente(CodigoCliente, out MensajesSalida);
         }
 
         public List<ClientesModelo> MtdBuscarCliente(string Nombre)
         {
-            string NombreBuscar = Nombre?.Trim() ?? "";
-            return _clientesDatos.MtdBuscarCliente(NombreBuscar);
+            return _clientesDatos.MtdBuscarCliente(Nombre);
         }
 
         public List<ClientesModelo> MtdConsultarClientes()
         {
-            return _clientesDatos.MtdConsultarCliente();
+            return _clientesDatos.MtdBuscarCliente();
         }
 
         // CORREGIDO: Ahora llama directamente a la clase correcta 'MunicipioDatos'

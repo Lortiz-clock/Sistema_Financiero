@@ -1,4 +1,4 @@
-﻿@model System.Data.DataTable
+﻿@model List<Sistema_Financiero.Models.UsuarioModelo>
 
 @{
     ViewData["Title"] = "Lista de Usuarios";
@@ -134,15 +134,15 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (System.Data.DataRow fila in Model.Rows)
+            @foreach (var u in Model)
             {
                 <tr>
-                    <td><strong>@fila["CodigoUsuario"]</strong></td>
-                    <td class="text-nowrap">@fila["NombreEmpleado"]</td>
-                    <td>@fila["NombreUsuario"]</td>
-                    <td>@fila["NombreRol"]</td>
+                    <td><strong>@u.CodigoUsuario</strong></td>
+                    <td class="text-nowrap">@u.NombreEmpleado</td>
+                    <td>@u.NombreUsuario</td>
+                    <td>@u.NombreRol</td>
                     <td>
-                        @if (fila["Estado"].ToString() == "True")
+                        @if (u.Estado)
                         {
                             <span class="badge badge-activo">Activo</span>
                         }
@@ -154,10 +154,10 @@
                     @if (User.IsInRole("Administrador"))
                     {
                         <td class="text-nowrap">
-                            <a href="@Url.Action("Editar", "Usuarios", new { id = fila["CodigoUsuario"] })" class="btn-accion btn-editar">
+                            <a href="@Url.Action("Editar", "Usuarios", new { id = u.CodigoUsuario })" class="btn-accion btn-editar">
                                 <i class="fa-solid fa-pen"></i> Editar
                             </a>
-                            <a href="@Url.Action("Eliminar", "Usuarios", new { id = fila["CodigoUsuario"] })"
+                            <a href="@Url.Action("Eliminar", "Usuarios", new { id = u.CodigoUsuario })"
                                class="btn-accion btn-eliminar"
                                onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
                                 <i class="fa-solid fa-trash"></i> Eliminar

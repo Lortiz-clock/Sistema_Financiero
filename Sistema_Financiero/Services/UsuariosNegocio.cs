@@ -1,6 +1,6 @@
-﻿using System.Data;
-using Sistema_Financiero.data;
+﻿using Sistema_Financiero.data;
 using Sistema_Financiero.Models;
+using System.Data;
 
 namespace Sistema_Financiero.Services
 {
@@ -13,36 +13,34 @@ namespace Sistema_Financiero.Services
             _usuariosDatos = usuariosDatos;
         }
 
-        
         public DataTable MtdValidarUsuario(string usuario, string contrasena)
         {
             return _usuariosDatos.MtdValidarUsuario(usuario, contrasena);
         }
 
-        
-        public DataTable MtdConsultarUsuarios()
+        public List<UsuarioModelo> MtdConsultarUsuarios()
         {
             return _usuariosDatos.MtdConsultarUsuarios();
         }
 
-        public DataTable MtdConsultarRoles()
+        public List<RolModelo> MtdConsultarRoles()
         {
             return _usuariosDatos.MtdConsultarRoles();
         }
 
-        public void MtdInsertarUsuario(UsuarioModelo u)
+        public bool MtdInsertarUsuario(UsuarioModelo usuario, out string mensajeSalida)
         {
-            _usuariosDatos.MtdInsertarUsuario(u);
+            return _usuariosDatos.MtdInsertarUsuario(usuario, out mensajeSalida);
         }
 
-        public void MtdActualizarUsuario(UsuarioModelo u)
+        public string MtdEditarUsuario(UsuarioModelo usuario, out string mensajeSalida)
         {
-            _usuariosDatos.MtdActualizarUsuario(u);
+            return _usuariosDatos.MtdEditarUsuario(usuario, out mensajeSalida);
         }
 
-        public void MtdEliminarUsuario(int codigo)
+        public string MtdEliminarUsuario(int codigo)
         {
-            _usuariosDatos.MtdEliminarUsuario(codigo);
+            return _usuariosDatos.MtdEliminarUsuario(codigo);
         }
     }
 }

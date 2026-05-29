@@ -39,10 +39,31 @@ namespace Sistema_Financiero.Controllers
 
                 if (dtUsuario.Rows.Count > 0)
                 {
-                    // Extraemos los datos reales de la consulta SQL de forma segura
-                    string NombreUsuarioReal = dtUsuario.Rows[0]["Nombre"].ToString() ?? usuario;
-                    string NombreRol =   dtUsuario.Rows[0]["NombreRol"].ToString() ?? "Operador";
+                    DataRow fila = dtUsuario.Rows[0];
 
+                    // 1. Extraemos el Nombre del usuario de forma segura tratando de leer "Nombre" o "NombreUsuario"
+                    string NombreUsuarioReal = usuario;
+                    if (dtUsuario.Columns.Contains("Nombre"))
+                        NombreUsuarioReal = fila["Nombre"].ToString() ?? usuario;
+                    else if (dtUsuario.Columns.Contains("NombreUsuario"))
+                        NombreUsuarioReal = fila["NombreUsuario"].ToString() ?? usuario;
+
+                    // 2. Extraemos el Rol de forma ultra segura para evitar que el sistema tire "ERROR"
+                    string NombreRol = "Operador";
+
+                    if (dtUsuario.Columns.Contains("NombreRol"))
+                    {
+                        NombreRol = fila["NombreRol"].ToString() ?? "Operador";
+                    }
+                    else if (dtUsuario.Columns.Contains("CodigoRol"))
+                    {
+                        // Si tu SP de login solo devuelve el ID del rol, lo mapeamos manualmente
+                        string codigo = fila["CodigoRol"].ToString() ?? "";
+                        if (codigo == "1") NombreRol = "Administrador";
+                        else if (codigo == "3") NombreRol = "Supervisor";
+                    }
+
+                    // 3. Creamos las credenciales y los permisos para los candados [Authorize]
                     var claims = new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, NombreUsuarioReal),
@@ -52,20 +73,20 @@ namespace Sistema_Financiero.Controllers
                     var identity = new ClaimsIdentity(claims, "CookieAuth");
                     var principal = new ClaimsPrincipal(identity);
 
+                    // Iniciamos la sesión en el navegador
                     await HttpContext.SignInAsync("CookieAuth", principal);
 
                     return RedirectToAction("Index", "Empleados");
                 }
                 else
                 {
-                    // DIAGNÓSTICO: Si el SP se ejecuta pero no encuentra coincidencia
-                    ViewBag.Error = "Usuario o contraseña no validos";
+                    ViewBag.Error = "Usuario o contraseña no válidos.";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Captura fallas de conexión o errores internos de SQL Server
-                ViewBag.Error = "ERROR";
+                // Si la base de datos falla, te dirá exactamente qué columna o parámetro causó el problema
+                ViewBag.Error = "Error de autenticación: " + ex.Message;
             }
 
             return View();
@@ -76,6 +97,7 @@ namespace Sistema_Financiero.Controllers
             await HttpContext.SignOutAsync("CookieAuth");
             return RedirectToAction("Login");
         }
+
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {

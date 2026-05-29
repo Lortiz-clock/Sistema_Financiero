@@ -30,12 +30,12 @@ namespace Sistema_Financiero.data
                                 {
                                     CodigoCliente = Convert.ToInt32(dr["CodigoCliente"]),
                                     CodigoMunicipio = dr["CodigoMunicipio"] != DBNull.Value ? Convert.ToInt32(dr["CodigoMunicipio"]) : 0,
-                                    Nombre = dr["Nombre"].ToString(),
-                                    DPI = dr["DPI"].ToString(),
-                                    NIT = dr["NIT"].ToString(),
-                                    Correo= dr["Correo"].ToString(),
-                                    Direccion = dr["Direccion"].ToString(),
-                                    Tipo = dr["Tipo"].ToString()
+                                    Nombre = dr["Nombre"].ToString() ??"",
+                                    DPI = dr["DPI"].ToString() ?? "",
+                                    NIT = dr["NIT"].ToString() ?? "",
+                                    Correo= dr["Correo"].ToString() ?? "",
+                                    Direccion = dr["Direccion"].ToString() ?? "",
+                                    Tipo = dr["Tipo"].ToString() ?? ""
                                 });
                             }
                         }

@@ -95,19 +95,15 @@
 
         <div class="form-group">
             <label>Rol</label>
-            <select name="CodigoRol" class="form-control">
+            <select name="CodigoRol" class="form-control" required>
+                <option value="">-- Seleccione un Rol --</option>
                 @if (ViewBag.Roles != null)
                 {
-                    @foreach (System.Data.DataRow rol in ((System.Data.DataTable)ViewBag.Roles).Rows)
+                    @foreach (var rol in (List<Sistema_Financiero.Models.RolModelo>)ViewBag.Roles)
                     {
-                        if (rol["CodigoRol"].ToString() == Model.CodigoRol.ToString())
-                        {
-                            <option value="@rol["CodigoRol"]" selected>@rol["Nombre"]</option>
-                        }
-                        else
-                        {
-                            <option value="@rol["CodigoRol"]">@rol["Nombre"]</option>
-                        }
+                        <!option value="@rol.CodigoRol" @(rol.CodigoRol == Model.CodigoRol ? "selected" : "")>
+                            @rol.Nombre
+                        </!option>
                     }
                 }
             </select>
@@ -128,10 +124,10 @@
                 }
             </select>
         </div>
-            <div class="forn-group">
-                <label> Nueva Contraseña </label>
-                <input type="password" name="Clave" class="form-control" placeholder="Escribir Nueva contraceña"- />
-            </div>
+            <div class="form-group">
+    <label>Nueva Contraseña (Dejar vacío para no cambiar)</label>
+    <input type="password" name="Clave" class="form-control" placeholder="Escribir Nueva contraseña" />
+</div>
 
 
         <button type="submit" class="btn-guardar">Guardar Cambios</button>

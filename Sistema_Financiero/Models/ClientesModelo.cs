@@ -4,13 +4,13 @@
     {
         public int CodigoCliente { get; set; }
         public int CodigoMunicipio { get; set; }
-        public string? Nombre { get; set; }
-        public string? DPI { get; set; }
-        public string? NIT { get; set; }
-        public string? Telefono { get; set; }
-        public string? Correo { get; set; }
-        public string? Direccion { get; set; }
-        public string? Tipo { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string DPI { get; set; } = string.Empty;
+        public string NIT { get; set; } = string.Empty;
+        public string Telefono { get; set; } = string.Empty;
+        public string Correo { get; set; } = string.Empty;
+        public string Direccion { get; set; } = string.Empty;
+        public string Tipo { get; set; } = string.Empty;
 
     }
 }

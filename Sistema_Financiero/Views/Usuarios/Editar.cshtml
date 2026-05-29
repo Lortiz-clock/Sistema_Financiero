@@ -101,9 +101,9 @@
                 {
                     @foreach (var rol in (List<Sistema_Financiero.Models.RolModelo>)ViewBag.Roles)
                     {
-                        <!option value="@rol.CodigoRol" @(rol.CodigoRol == Model.CodigoRol ? "selected" : "")>
+                        <option value="@rol.CodigoRol" selected="@(rol.CodigoRol == Model.CodigoRol)">
                             @rol.Nombre
-                        </!option>
+                        </option>
                     }
                 }
             </select>

@@ -18,7 +18,7 @@ namespace Sistema_Financiero.Models
         // 2. Esta propiedad es vital para la CONSULTA (Mapea con u.Nombre AS NombreUsuario de tu SP)
         public string? NombreUsuario { get; set; }
 
-        [Required]
+        
         public string? Clave { get; set; }
 
         public bool Estado { get; set; }

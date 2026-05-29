@@ -33,7 +33,7 @@ namespace Sistema_Financiero.Services
             return _usuariosDatos.MtdInsertarUsuario(usuario, out mensajeSalida);
         }
 
-        public string MtdEditarUsuario(UsuarioModelo usuario, out string mensajeSalida)
+        public bool MtdEditarUsuario(UsuarioModelo usuario, out string mensajeSalida)
         {
             return _usuariosDatos.MtdEditarUsuario(usuario, out mensajeSalida);
         }

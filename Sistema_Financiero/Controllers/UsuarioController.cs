@@ -133,6 +133,7 @@ namespace Sistema_Financiero.Controllers
         }
 
         // ── ELIMINAR USUARIO ──
+        [HttpPost]
         public IActionResult Eliminar(int id)
         {
             try

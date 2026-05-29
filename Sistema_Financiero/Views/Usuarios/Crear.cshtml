@@ -100,9 +100,9 @@
             <select name="CodigoRol" class="form-control">
                 @if (ViewBag.Roles != null)
                 {
-                    @foreach (System.Data.DataRow rol in ((System.Data.DataTable)ViewBag.Roles).Rows)
+                    @foreach (var rol in (List<Sistema_Financiero.Models.RolModelo>)ViewBag.Roles)
                     {
-                        <option value="@rol["CodigoRol"]">@rol["Nombre"]</option>
+                        <option value="@rol.CodigoRol">@rol.Nombre</option>
                     }
                 }
             </select>

@@ -157,11 +157,13 @@
                             <a href="@Url.Action("Editar", "Usuarios", new { id = u.CodigoUsuario })" class="btn-accion btn-editar">
                                 <i class="fa-solid fa-pen"></i> Editar
                             </a>
-                            <a href="@Url.Action("Eliminar", "Usuarios", new { id = u.CodigoUsuario })"
-                               class="btn-accion btn-eliminar"
-                               onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
-                                <i class="fa-solid fa-trash"></i> Eliminar
-                            </a>
+                            <form action="@Url.Action("Eliminar", "Usuarios", new { id = u.CodigoUsuario })"
+                                  method="POST" style="display:inline;"
+                                  onsubmit="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                <button type="submit" class="btn-accion btn-eliminar">
+                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                </button>
+                            </form>
                         </td>
                     }
                 </tr>

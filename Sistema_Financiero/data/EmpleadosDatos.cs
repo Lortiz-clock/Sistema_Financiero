@@ -103,7 +103,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_BuscarEmpleado", conn))
+                using (SqlCommand cmd = new SqlCommand("usp_BuscarEmpleados", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Nombre", nombre ?? "");
@@ -156,12 +156,12 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.AddWithValue("@Cargo", empleados.Cargo);
                     cmd.Parameters.AddWithValue("@Estado", empleados.Estado);
 
-                    SqlParameter pResultado = new SqlParameter("Resultado", SqlDbType.Bit)
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
 
-                    SqlParameter pMensaje = new SqlParameter("Mensaje", SqlDbType.NVarChar, 500)
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -171,6 +171,9 @@ namespace Sistema_Financiero.data
 
                     conn.Open();
                     cmd.ExecuteNonQuery();
+
+                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    mensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
 
             }

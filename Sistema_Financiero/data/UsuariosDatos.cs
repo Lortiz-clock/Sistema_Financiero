@@ -145,7 +145,7 @@ namespace Sistema_Financiero.data
         }
 
         // ── EDITAR USUARIO (Con parámetros de salida OUTPUT) ──
-        public string MtdEditarUsuario(UsuarioModelo usuario, out string MensajeSalida)
+        public bool MtdEditarUsuario(UsuarioModelo usuario, out string MensajeSalida)
         {
             using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
             {
@@ -170,8 +170,8 @@ namespace Sistema_Financiero.data
                     bool resultado = Convert.ToBoolean(pResultado.Value);
                     string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje del servidor";
 
-                    MensajeSalida = mensaje;
-                    return mensaje;
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
+                    return Convert.ToBoolean(pResultado.Value);
                 }
             }
         }

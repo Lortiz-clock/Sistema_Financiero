@@ -193,7 +193,7 @@ namespace Sistema_Financiero.data
             return resultadoFinal;
         }
 
-        public List<ClientesModelo> MtdBuscarCliente()
+        public List<ClientesModelo> MtdBuscarCliente(string nombre)
         {
             var lista = new List<ClientesModelo>();
             try

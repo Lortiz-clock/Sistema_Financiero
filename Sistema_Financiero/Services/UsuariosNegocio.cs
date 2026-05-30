@@ -18,9 +18,14 @@ namespace Sistema_Financiero.Services
             return _usuariosDatos.MtdValidarUsuario(usuario, contrasena);
         }
 
-        public List<UsuarioModelo> MtdConsultarUsuarios()
+        public List<UsuarioModelo> MtdBuscarUsuarios(string nombre)
         {
-            return _usuariosDatos.MtdConsultarUsuarios();
+            return _usuariosDatos.MtdBuscarUsuario(nombre);
+        }
+
+        public bool MtdEditarUsuario(UsuarioModelo usuario, out string mensajeSalida)
+        {
+            return _usuariosDatos.MtdEditarUsuario(usuario, out mensajeSalida);
         }
 
         public List<RolModelo> MtdConsultarRoles()
@@ -33,7 +38,7 @@ namespace Sistema_Financiero.Services
             return _usuariosDatos.MtdInsertarUsuario(usuario, out mensajeSalida);
         }
 
-        public bool MtdEditarUsuario(UsuarioModelo usuario, out string mensajeSalida)
+        public bool MtdEditarUsuarios(UsuarioModelo usuario, out string mensajeSalida)
         {
             return _usuariosDatos.MtdEditarUsuario(usuario, out mensajeSalida);
         }
@@ -41,6 +46,11 @@ namespace Sistema_Financiero.Services
         public string MtdEliminarUsuario(int codigo)
         {
             return _usuariosDatos.MtdEliminarUsuario(codigo);
+        }
+
+        public List<UsuarioModelo> MtdConsultarUsuarios()
+        {
+            return _usuariosDatos.MtdConsultarUsuarios();
         }
     }
 }

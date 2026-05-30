@@ -37,8 +37,6 @@ namespace Sistema_Financiero.data
             }
             return dt;
         }
-
-        // ── CONSULTAR USUARIOS (Listas con SqlDataReader como Sucursales) ──
         public List<UsuarioModelo> MtdConsultarUsuarios()
         {
             var lista = new List<UsuarioModelo>();
@@ -59,10 +57,10 @@ namespace Sistema_Financiero.data
                                 CodigoEmpleado = dr["CodigoEmpleado"] != DBNull.Value ? Convert.ToInt32(dr["CodigoEmpleado"]) : 0,
                                 CodigoRol = dr["CodigoRol"] != DBNull.Value ? Convert.ToInt32(dr["CodigoRol"]) : 0,
                                 Nombre = dr["Nombre"].ToString(),
-                                NombreUsuario = dr["Nombre"].ToString(),
+                                NombreUsuario = dr["NombreUsuario"].ToString(),
                                 Estado = Convert.ToBoolean(dr["Estado"]),
-                                NombreEmpleado = "Empleado #" + dr["CodigoEmpleado"],
-                                NombreRol = "Rol #" + dr["CodigoRol"]
+                                NombreEmpleado = dr["NombreEmpleado"] != DBNull.Value ? dr["NombreEmpleado"].ToString() : "Sin empleado",
+                                NombreRol = dr["NombreRol"] != DBNull.Value ? dr["NombreRol"].ToString() : "Sin rol"
                             });
                         }
                     }
@@ -147,9 +145,10 @@ namespace Sistema_Financiero.data
         // ── EDITAR USUARIO (Con parámetros de salida OUTPUT) ──
         public bool MtdEditarUsuario(UsuarioModelo usuario, out string MensajeSalida)
         {
-            using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+            MensajeSalida = "";
+            try
             {
-                conn.Open();
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
                 using (SqlCommand cmd = new SqlCommand("usp_ActualizarUsuario", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -165,14 +164,17 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
 
+                    conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje del servidor";
-
                     MensajeSalida = pMensaje.Value?.ToString() ?? "";
-                    return Convert.ToBoolean(pResultado.Value);
+                    return pResultado.Value != DBNull.Value && Convert.ToBoolean(pResultado.Value);
                 }
+            }
+            catch (Exception ex)
+            {
+                MensajeSalida = "Error inesperado al editar usuario: " + ex.Message;
+                return false;
             }
         }
 
@@ -182,7 +184,7 @@ namespace Sistema_Financiero.data
             using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
             {
                 conn.Open();
-                using (SqlCommand cmd = new SqlCommand("usp_EliminarUsuario", conn))
+                using (SqlCommand cmd = new SqlCommand("usp_EliminarUsuarios", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@CodigoUsuario", codigo);
@@ -203,6 +205,42 @@ namespace Sistema_Financiero.data
                     return mensaje;
                 }
             }
+        }
+
+        public List<UsuarioModelo> MtdBuscarUsuario(string nombre)
+        {
+            var lista = new List<UsuarioModelo>();
+            try
+            {
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("BuscarUsuarios", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Nombre", nombre ?? "");
+
+                    conn.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new UsuarioModelo
+                            {
+                                CodigoUsuario = Convert.ToInt32(dr["CodigoUsuario"]),
+                                CodigoEmpleado = dr["CodigoEmpleado"] != DBNull.Value ? Convert.ToInt32(dr["CodigoEmpleado"]) : 0,
+                                CodigoRol = dr["CodigoRol"] != DBNull.Value ? Convert.ToInt32(dr["CodigoRol"]) : 0,
+                                Nombre = dr["Nombre"].ToString(),
+                                Clave = dr["Clave"].ToString(),
+                                Estado = Convert.ToBoolean(dr["Estado"])
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error en Datos al buscar usuario: " + ex.Message);
+            }
+            return lista;
         }
     }
 }

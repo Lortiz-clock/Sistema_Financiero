@@ -5,92 +5,96 @@ using Sistema_Financiero.Models;
 
 namespace Sistema_Financiero.Controllers
 {
-    // Restringido completamente al Administrador a nivel de clase
     [Authorize(Roles = "Administrador")]
     public class UsuariosController : Controller
     {
         private readonly UsuariosNegocio _usuariosNegocio;
+        private readonly EmpleadosNegocio _empleadosNegocio;
 
-        public UsuariosController(UsuariosNegocio usuariosNegocio)
+        // El constructor ya recibe correctamente las dos capas por Inyección de Dependencias
+        public UsuariosController(UsuariosNegocio usuariosNegocio, EmpleadosNegocio empleadosNegocio)
         {
             _usuariosNegocio = usuariosNegocio;
+            _empleadosNegocio = empleadosNegocio;
         }
 
-        // ── LISTADO PRINCIPAL (INDEX) ──
-        public IActionResult Index()
+        // ── LISTADO PRINCIPAL ──
+        public IActionResult Index(string buscarNombre)
         {
-            try
+            List<UsuarioModelo> usuario;
+
+            if (!string.IsNullOrEmpty(buscarNombre))
             {
-                // Manejo seguro de nulabilidad usando el operador de coalescencia
-                List<UsuarioModelo> lista = _usuariosNegocio.MtdConsultarUsuarios() ?? new List<UsuarioModelo>();
-                return View(lista);
+                usuario = _usuariosNegocio.MtdBuscarUsuarios(buscarNombre);
+                ViewBag.BusquedaActual = buscarNombre;
             }
-            catch (Exception ex)
+            else
             {
-                TempData["MensajeError"] = "Error al consultar la lista: " + ex.Message;
-                return View(new List<UsuarioModelo>());
+                usuario = _usuariosNegocio.MtdConsultarUsuarios();
             }
+
+            return View(usuario);
         }
 
-        // ── CREAR USUARIO (GET) ──
+        // ── CREAR (GET) ──
         public IActionResult Crear()
         {
             try
             {
+                // 1. CARGAMOS LOS ROLES (Como ya lo tenías)
                 ViewBag.Roles = _usuariosNegocio.MtdConsultarRoles() ?? new List<RolModelo>();
+
+                // 2. ¡AQUÍ ESTÁ EL TRUCO! Cargamos los empleados usando la variable privada _empleadosNegocio
+                ViewBag.Empleados = _empleadosNegocio.MtdConsultarEmpleados() ?? new List<EmpleadosModelo>();
+
                 return View();
             }
             catch (Exception ex)
             {
-                TempData["MensajeError"] = "Error al cargar el formulario de creación: " + ex.Message;
+                TempData["MensajeError"] = "Error al cargar el formulario: " + ex.Message;
                 return RedirectToAction("Index");
             }
         }
 
-        // ── CREAR USUARIO (POST) ──
+        // ── CREAR (POST) ──
         [HttpPost]
         public IActionResult Crear(UsuarioModelo u)
         {
             try
             {
-                string mensajeSalida = "";
-                // Acoplado al método bool con parámetro OUT de tu nueva capa de negocio
-                bool insertado = _usuariosNegocio.MtdInsertarUsuario(u, out mensajeSalida);
+                bool insertado = _usuariosNegocio.MtdInsertarUsuario(u, out string mensajeSalida);
 
                 if (insertado)
                 {
                     TempData["MensajeExito"] = mensajeSalida;
                     return RedirectToAction("Index");
                 }
-                else
-                {
-                    ViewBag.Error = mensajeSalida;
-                    ViewBag.Roles = _usuariosNegocio.MtdConsultarRoles() ?? new List<RolModelo>();
-                    return View(u);
-                }
+
+                // Si no se pudo insertar, volvemos a llenar AMBOS Comboboxes para no romper la vista
+                ViewBag.Error = mensajeSalida;
+                ViewBag.Roles = _usuariosNegocio.MtdConsultarRoles() ?? new List<RolModelo>();
+                ViewBag.Empleados = _empleadosNegocio.MtdConsultarEmpleados() ?? new List<EmpleadosModelo>(); // <- Agregado aquí
+
+                return View(u);
             }
             catch (Exception ex)
             {
+                // Si ocurre una excepción, también recargamos AMBOS Comboboxes antes de retornar la vista
                 ViewBag.Error = "Error inesperado al crear: " + ex.Message;
                 ViewBag.Roles = _usuariosNegocio.MtdConsultarRoles() ?? new List<RolModelo>();
+                ViewBag.Empleados = _empleadosNegocio.MtdConsultarEmpleados() ?? new List<EmpleadosModelo>(); // <- Agregado aquí
+
                 return View(u);
             }
         }
 
-        // ── EDITAR USUARIO (GET) ──
+        // ── EDITAR (GET) ──
         public IActionResult Editar(int id)
         {
             try
             {
-                var listaUsuarios = _usuariosNegocio.MtdConsultarUsuarios();
-                if (listaUsuarios == null)
-                {
-                    TempData["MensajeError"] = "No se pudo recuperar la lista de usuarios desde el servidor.";
-                    return RedirectToAction("Index");
-                }
-
-                // Buscamos con LINQ sobre la lista genérica tipada
-                var usuario = listaUsuarios.FirstOrDefault(u => u.CodigoUsuario == id);
+                var lista = _usuariosNegocio.MtdConsultarUsuarios();
+                var usuario = lista?.FirstOrDefault(u => u.CodigoUsuario == id);
 
                 if (usuario == null)
                 {
@@ -98,10 +102,14 @@ namespace Sistema_Financiero.Controllers
                     return RedirectToAction("Index");
                 }
 
-                // Evitamos mandar la contraseña actual en texto plano al HTML por seguridad
-                usuario.Clave = "";
+                usuario.Clave = ""; // no exponemos la clave actual en el HTML
 
+                // 1. Cargamos los Roles
                 ViewBag.Roles = _usuariosNegocio.MtdConsultarRoles() ?? new List<RolModelo>();
+
+                // 2. ¡OBLIGATORIO PARA EDITAR! Cargamos los empleados para el nuevo Combobox
+                ViewBag.Empleados = _empleadosNegocio.MtdConsultarEmpleados() ?? new List<EmpleadosModelo>();
+
                 return View(usuario);
             }
             catch (Exception ex)
@@ -111,19 +119,26 @@ namespace Sistema_Financiero.Controllers
             }
         }
 
-        // ── EDITAR USUARIO (POST) ──
+        // ── EDITAR (POST) ──
         [HttpPost]
         public IActionResult Editar(UsuarioModelo u)
         {
             try
             {
-                string mensajeSalida = "";
-                // Sincronizado con la firma exacta string MtdEditarUsuario(..., out string) de Negocio
-                _usuariosNegocio.MtdEditarUsuario(u, out mensajeSalida);
+                bool exito = _usuariosNegocio.MtdEditarUsuario(u, out string mensajeSalida);
 
-                // Si tu SP gestiona la salida por medio de @Mensaje, lo enviamos directo al TempData
-                TempData["MensajeExito"] = !string.IsNullOrEmpty(mensajeSalida) ? mensajeSalida : "Usuario actualizado con éxito.";
-                return RedirectToAction("Index");
+                if (exito)
+                {
+                    TempData["MensajeExito"] = mensajeSalida;
+                    return RedirectToAction("Index");
+                }
+
+                ViewBag.Error = mensajeSalida;
+                // Si hay error de validación en la base de datos, volvemos a cargar ambos combos antes de retornar la vista
+                ViewBag.Roles = _usuariosNegocio.MtdConsultarRoles() ?? new List<RolModelo>();
+                ViewBag.Empleados = _empleadosNegocio.MtdConsultarEmpleados() ?? new List<EmpleadosModelo>(); // <- Agregado aquí también
+
+                return View(u);
             }
             catch (Exception ex)
             {
@@ -132,13 +147,12 @@ namespace Sistema_Financiero.Controllers
             }
         }
 
-        // ── ELIMINAR USUARIO ──
+        // ── ELIMINAR (POST) ──
         [HttpPost]
         public IActionResult Eliminar(int id)
         {
             try
             {
-                // El método retorna el mensaje devuelto por el parámetro OUTPUT de la base de datos
                 string mensaje = _usuariosNegocio.MtdEliminarUsuario(id);
                 TempData["MensajeExito"] = !string.IsNullOrEmpty(mensaje) ? mensaje : "Usuario eliminado con éxito.";
             }

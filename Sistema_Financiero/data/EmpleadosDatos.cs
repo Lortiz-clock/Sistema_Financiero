@@ -193,7 +193,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_EliminarEmpleado", conn))
+                using (SqlCommand cmd = new SqlCommand("usp_EliminarEmpleados", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@CodigoEmpleado", Codigo);

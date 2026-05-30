@@ -34,9 +34,9 @@ namespace Sistema_Financiero.Services
             return _clientesDatos.MtdBuscarCliente(Nombre);
         }
 
-        public List<ClientesModelo> MtdConsultarClientes()
+        public List<ClientesModelo> MtdConsultarClientes(string nombre)
         {
-            return _clientesDatos.MtdBuscarCliente();
+            return _clientesDatos.MtdConsultarCliente(nombre);
         }
 
         // CORREGIDO: Ahora llama directamente a la clase correcta 'MunicipioDatos'

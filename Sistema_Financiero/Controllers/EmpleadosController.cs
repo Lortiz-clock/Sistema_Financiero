@@ -9,10 +9,7 @@ namespace Sistema_Financiero.Controllers
     public class EmpleadosController : Controller
     {
         private readonly EmpleadosNegocio _empleadosNegocio;
-        // 1. Declaramos el servicio de Sucursales para poder consultar la lista
         private readonly SucursalesNegocio _sucursalesNegocio;
-
-        // 2. Lo agregamos al constructor para que ASP.NET Core lo inyecte automáticamente
         public EmpleadosController(EmpleadosNegocio empleadosNegocio, SucursalesNegocio sucursalesNegocio)
         {
             _empleadosNegocio = empleadosNegocio;

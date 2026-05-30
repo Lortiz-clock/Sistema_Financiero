@@ -1,7 +1,7 @@
-﻿@model System.Data.DataTable
+﻿@model List<Sistema_Financiero.Models.SucursalesModelo>
 
 @{
-    ViewData["Title"] = "Lista de Usuarios";
+    ViewData["Title"] = "Lista de Sucursales";
 }
 
 <style>
@@ -31,7 +31,7 @@
         }
 
         .custom-table th, .custom-table td {
-            padding: 10px 12px;
+            padding: 12px 14px;
             vertical-align: middle;
         }
 
@@ -75,7 +75,9 @@
         border: none;
         cursor: pointer;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
 
     .btn-editar {
@@ -86,6 +88,7 @@
     .btn-eliminar {
         background-color: #ffeeee;
         color: #e53e3e;
+        margin-left: 5px;
     }
 
     .btn-nuevo {
@@ -97,25 +100,94 @@
         font-weight: 600;
         text-decoration: none;
         display: inline-block;
-        margin-bottom: 15px;
+    }
+
+    .search-box {
+        display: inline-flex;
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 4px 10px;
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .search-input {
+        border: none;
+        outline: none;
+        padding: 4px;
+        font-size: 13px;
+        color: #2d3748;
+        width: 100%;
+    }
+
+    .search-btn {
+        background: none;
+        border: none;
+        color: #1e40af;
+        cursor: pointer;
+        padding: 0 5px;
+    }
+
+    .btn-clear {
+        color: #e53e3e;
+        text-decoration: none;
+        font-size: 11px;
+        margin-left: 5px;
+    }
+
+    .subtext {
+        font-size: 11px;
+        color: #718096;
+        margin-top: 2px;
+        display: block;
     }
 </style>
 
 <h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:5px;">
-    Lista de Usuarios
+    Lista de Sucursales
 </h2>
-<p style="color:#718096;margin-bottom:20px;">Gestión de accesos y roles del sistema.</p>
+<p style="color:#718096;margin-bottom:20px;">Gestión de sedes, agencias y ubicaciones físicas del sistema.</p>
 
-@if (User.IsInRole("Administrador"))
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 15px;">
+    <div>
+        @if (User.IsInRole("Administrador"))
+        {
+            <a href="@Url.Action("Agregar", "Sucursales")" class="btn-nuevo">
+                <i class="fa-solid fa-plus"></i> Nueva Sucursal
+            </a>
+        }
+    </div>
+
+    <form action="@Url.Action("Index", "Sucursales")" method="GET" style="margin: 0; display: flex; align-items: center;">
+        <div class="search-box">
+            <input type="text" name="buscarNombre" class="search-input" placeholder="Buscar sucursal..." value="@ViewBag.BusquedaActual" />
+            <button type="submit" class="search-btn">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+        @if (!string.IsNullOrEmpty(ViewBag.BusquedaActual))
+        {
+            <a href="@Url.Action("Index", "Sucursales")" class="btn-clear" title="Limpiar búsqueda">
+                <i class="fa-solid fa-circle-xmark"></i> Limpiar
+            </a>
+        }
+    </form>
+</div>
+
+@if (TempData["MensajeExito"] != null)
 {
-    <a href="@Url.Action("Crear", "Usuarios")" class="btn-nuevo">
-        <i class="fa-solid fa-plus"></i> Nuevo Usuario
-    </a>
+    <div style="background-color: #e6fffa; color: #00a389; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 15px; font-family: 'Segoe UI', sans-serif;">
+        <i class="fa-solid fa-circle-check"></i> @TempData["MensajeExito"]
+    </div>
 }
 
-@if (ViewBag.Error != null)
+@if (TempData["MensajeError"] != null)
 {
-    <div class="alert-danger" style="margin-bottom:15px;">@ViewBag.Error</div>
+    <div style="background-color:#ffeeee;color:#e53e3e;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:15px;font-family:'Segoe UI',sans-serif;">
+        <i class="fa-solid fa-circle-exclamation"></i> @TempData["MensajeError"]
+    </div>
 }
 
 <div class="table-container">
@@ -123,9 +195,10 @@
         <thead>
             <tr>
                 <th>Código</th>
-                <th>Empleado</th>
-                <th>Usuario</th>
-                <th>Rol</th>
+                <th>Nombre Sucursal</th>
+                <th>Contacto Tel.</th>
+                <th>Dirección Física</th>
+                <th>Municipio ID</th>
                 <th>Estado</th>
                 @if (User.IsInRole("Administrador"))
                 {
@@ -134,37 +207,51 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (System.Data.DataRow fila in Model.Rows)
+            @if (Model == null || !Model.Any())
             {
                 <tr>
-                    <td><strong>@fila["CodigoUsuario"]</strong></td>
-                    <td class="text-nowrap">@fila["NombreEmpleado"]</td>
-                    <td>@fila["NombreUsuario"]</td>
-                    <td>@fila["NombreRol"]</td>
-                    <td>
-                        @if (fila["Estado"].ToString() == "True")
-                        {
-                            <span class="badge badge-activo">Activo</span>
-                        }
-                        else
-                        {
-                            <span class="badge badge-inactivo">Inactivo</span>
-                        }
+                    <td colspan="@(User.IsInRole("Administrador") ? "7" : "6")" style="text-align: center; color: #a0aec0; padding: 20px;">
+                        No se encontraron sucursales registradas.
                     </td>
-                    @if (User.IsInRole("Administrador"))
-                    {
-                        <td class="text-nowrap">
-                            <a href="@Url.Action("Editar", "Usuarios", new { id = fila["CodigoUsuario"] })" class="btn-accion btn-editar">
-                                <i class="fa-solid fa-pen"></i> Editar
-                            </a>
-                            <a href="@Url.Action("Eliminar", "Usuarios", new { id = fila["CodigoUsuario"] })"
-                               class="btn-accion btn-eliminar"
-                               onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
-                                <i class="fa-solid fa-trash"></i> Eliminar
-                            </a>
-                        </td>
-                    }
                 </tr>
+            }
+            else
+            {
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td><strong>@s.CodigoSucursal</strong></td>
+                        <td class="text-nowrap" style="font-weight: 500; color: #1e40af;">@s.Nombre</td>
+                        <td>@s.Telefono</td>
+                        <td>@s.Direccion</td>
+                        <td><span style="color:#718096;">@s.CodigoMunicipio</span></td>
+                        <td>
+                            @if (s.Estado ?? false)
+                            {
+                                <span class="badge badge-activo">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-inactivo">Inactivo</span>
+                            }
+                        </td>
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <td class="text-nowrap">
+                                <a href="@Url.Action("Editar", "Sucursales", new { id = s.CodigoSucursal })" class="btn-accion btn-editar">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </a>
+                                <form action="@Url.Action("Eliminar", "Sucursales", new { id = s.CodigoSucursal })"
+                                      method="POST" style="display:inline;"
+                                      onsubmit="return confirm('¿Estás seguro de eliminar esta sucursal?')">
+                                    <button type="submit" class="btn-accion btn-eliminar">
+                                        <i class="fa-solid fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        }
+                    </tr>
+                }
             }
         </tbody>
     </table>

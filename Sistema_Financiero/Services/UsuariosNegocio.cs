@@ -1,6 +1,6 @@
-﻿using System.Data;
-using Sistema_Financiero.data;
+﻿using Sistema_Financiero.data;
 using Sistema_Financiero.Models;
+using System.Data;
 
 namespace Sistema_Financiero.Services
 {
@@ -13,36 +13,44 @@ namespace Sistema_Financiero.Services
             _usuariosDatos = usuariosDatos;
         }
 
-        
         public DataTable MtdValidarUsuario(string usuario, string contrasena)
         {
             return _usuariosDatos.MtdValidarUsuario(usuario, contrasena);
         }
 
-        
-        public DataTable MtdConsultarUsuarios()
+        public List<UsuarioModelo> MtdBuscarUsuarios(string nombre)
         {
-            return _usuariosDatos.MtdConsultarUsuarios();
+            return _usuariosDatos.MtdBuscarUsuario(nombre);
         }
 
-        public DataTable MtdConsultarRoles()
+        public bool MtdEditarUsuario(UsuarioModelo usuario, out string mensajeSalida)
+        {
+            return _usuariosDatos.MtdEditarUsuario(usuario, out mensajeSalida);
+        }
+
+        public List<RolModelo> MtdConsultarRoles()
         {
             return _usuariosDatos.MtdConsultarRoles();
         }
 
-        public void MtdInsertarUsuario(UsuarioModelo u)
+        public bool MtdInsertarUsuario(UsuarioModelo usuario, out string mensajeSalida)
         {
-            _usuariosDatos.MtdInsertarUsuario(u);
+            return _usuariosDatos.MtdInsertarUsuario(usuario, out mensajeSalida);
         }
 
-        public void MtdActualizarUsuario(UsuarioModelo u)
+        public bool MtdEditarUsuarios(UsuarioModelo usuario, out string mensajeSalida)
         {
-            _usuariosDatos.MtdActualizarUsuario(u);
+            return _usuariosDatos.MtdEditarUsuario(usuario, out mensajeSalida);
         }
 
-        public void MtdEliminarUsuario(int codigo)
+        public string MtdEliminarUsuario(int codigo)
         {
-            _usuariosDatos.MtdEliminarUsuario(codigo);
+            return _usuariosDatos.MtdEliminarUsuario(codigo);
+        }
+
+        public List<UsuarioModelo> MtdConsultarUsuarios()
+        {
+            return _usuariosDatos.MtdConsultarUsuarios();
         }
     }
 }

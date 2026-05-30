@@ -6,6 +6,7 @@ namespace Sistema_Financiero.data
 {
     public class UsuariosDatos
     {
+        // 1. Declaramos la variable global con el nombre exacto para que no marque NULL ni inexistente
         private readonly ConexionDatos _conexionDatos;
 
         public UsuariosDatos(ConexionDatos conexionDatos)
@@ -13,7 +14,7 @@ namespace Sistema_Financiero.data
             _conexionDatos = conexionDatos;
         }
 
-        
+        // ── VALIDAR USUARIO (Mantiene DataTable para tu AccountController) ──
         public DataTable MtdValidarUsuario(string usuario, string contrasena)
         {
             DataTable dt = new DataTable();
@@ -30,21 +31,15 @@ namespace Sistema_Financiero.data
                         da.Fill(dt);
                 }
             }
-            catch (SqlException ex)
-            {
-                throw new Exception("Error en la base de datos al validar el usuario: " + ex.Message);
-            }
             catch (Exception ex)
             {
-                throw new Exception("Ocurrió un error inesperado en el sistema: " + ex.Message);
+                throw new Exception("Error al validar el usuario: " + ex.Message);
             }
             return dt;
         }
-
-        // ── MÉTODOS NUEVOS ──
-        public DataTable MtdConsultarUsuarios()
+        public List<UsuarioModelo> MtdConsultarUsuarios()
         {
-            DataTable dt = new DataTable();
+            var lista = new List<UsuarioModelo>();
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
@@ -52,24 +47,36 @@ namespace Sistema_Financiero.data
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     conn.Open();
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                        da.Fill(dt);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new UsuarioModelo
+                            {
+                                CodigoUsuario = Convert.ToInt32(dr["CodigoUsuario"]),
+                                CodigoEmpleado = dr["CodigoEmpleado"] != DBNull.Value ? Convert.ToInt32(dr["CodigoEmpleado"]) : 0,
+                                CodigoRol = dr["CodigoRol"] != DBNull.Value ? Convert.ToInt32(dr["CodigoRol"]) : 0,
+                                Nombre = dr["Nombre"].ToString(),
+                                NombreUsuario = dr["NombreUsuario"].ToString(),
+                                Estado = Convert.ToBoolean(dr["Estado"]),
+                                NombreEmpleado = dr["NombreEmpleado"] != DBNull.Value ? dr["NombreEmpleado"].ToString() : "Sin empleado",
+                                NombreRol = dr["NombreRol"] != DBNull.Value ? dr["NombreRol"].ToString() : "Sin rol"
+                            });
+                        }
+                    }
                 }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception("Error en la base de datos al consultar usuarios: " + ex.Message);
             }
             catch (Exception ex)
             {
-                throw new Exception("Ocurrió un error inesperado al consultar usuarios: " + ex.Message);
+                throw new Exception("Error en datos al consultar usuarios: " + ex.Message);
             }
-            return dt;
+            return lista;
         }
 
-        public DataTable MtdConsultarRoles()
+        // ── CONSULTAR ROLES ──
+        public List<RolModelo> MtdConsultarRoles()
         {
-            DataTable dt = new DataTable();
+            var lista = new List<RolModelo>();
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
@@ -77,97 +84,163 @@ namespace Sistema_Financiero.data
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     conn.Open();
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                        da.Fill(dt);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new RolModelo
+                            {
+                                CodigoRol = Convert.ToInt32(dr["CodigoRol"]),
+                                Nombre = dr["Nombre"].ToString()!,
+                                Estado = Convert.ToBoolean(dr["Estado"])
+                            });
+                        }
+                    }
                 }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception("Error en la base de datos al consultar roles: " + ex.Message);
             }
             catch (Exception ex)
             {
-                throw new Exception("Ocurrió un error inesperado al consultar roles: " + ex.Message);
+                throw new Exception("Error en datos al consultar roles: " + ex.Message);
             }
-            return dt;
+            return lista;
         }
 
-        public void MtdInsertarUsuario(UsuarioModelo usuarioModelo)
+        // ── AGREGAR USUARIO (Con parámetros de salida OUTPUT) ──
+        public bool MtdInsertarUsuario(UsuarioModelo usuario, out string MensajeSalida)
         {
+            bool resultadofinal = false;
+            MensajeSalida = "";
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
                 using (SqlCommand cmd = new SqlCommand("usp_InsertarUsuario", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@CodigoEmpleado", usuarioModelo.CodigoEmpleado);
-                    cmd.Parameters.AddWithValue("@CodigoRol", usuarioModelo.CodigoRol);
-                    cmd.Parameters.AddWithValue("@Nombre", usuarioModelo.Nombre);
-                    cmd.Parameters.AddWithValue("@Clave", usuarioModelo.Clave ?? "");
-                    cmd.Parameters.AddWithValue("@Estado", usuarioModelo.Estado);
+                    cmd.Parameters.AddWithValue("@CodigoEmpleado", usuario.CodigoEmpleado);
+                    cmd.Parameters.AddWithValue("@CodigoRol", usuario.CodigoRol);
+                    cmd.Parameters.AddWithValue("@Nombre", usuario.Nombre ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@Clave", usuario.Clave ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@Estado", usuario.Estado);
+
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
+                    cmd.Parameters.Add(pResultado);
+                    cmd.Parameters.Add(pMensaje);
+
                     conn.Open();
                     cmd.ExecuteNonQuery();
+
+                    resultadofinal = pResultado.Value != DBNull.Value && Convert.ToBoolean(pResultado.Value);
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception("Error en la base de datos al insertar usuario: " + ex.Message);
             }
             catch (Exception ex)
             {
-                throw new Exception("Ocurrió un error inesperado al insertar usuario: " + ex.Message);
+                resultadofinal = false;
+                MensajeSalida = "Ocurrió un error inesperado al agregar usuario: " + ex.Message;
             }
+            return resultadofinal;
         }
 
-        public void MtdActualizarUsuario(UsuarioModelo u)
+        // ── EDITAR USUARIO (Con parámetros de salida OUTPUT) ──
+        public bool MtdEditarUsuario(UsuarioModelo usuario, out string MensajeSalida)
         {
+            MensajeSalida = "";
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
                 using (SqlCommand cmd = new SqlCommand("usp_ActualizarUsuario", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@CodigoUsuario", u.CodigoUsuario);
-                    cmd.Parameters.AddWithValue("@CodigoEmpleado", u.CodigoEmpleado);
-                    cmd.Parameters.AddWithValue("@CodigoRol", u.CodigoRol);
-                    cmd.Parameters.AddWithValue("@Nombre", u.Nombre);
-                    cmd.Parameters.AddWithValue("@Clave", string.IsNullOrEmpty(u.Clave) ? (object)DBNull.Value : u.Clave);
-                    cmd.Parameters.AddWithValue("@Estado", u.Estado);
+                    cmd.Parameters.AddWithValue("@CodigoUsuario", usuario.CodigoUsuario);
+                    cmd.Parameters.AddWithValue("@CodigoEmpleado", usuario.CodigoEmpleado);
+                    cmd.Parameters.AddWithValue("@CodigoRol", usuario.CodigoRol);
+                    cmd.Parameters.AddWithValue("@Nombre", usuario.Nombre ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@Clave", string.IsNullOrEmpty(usuario.Clave) ? (object)DBNull.Value : usuario.Clave);
+                    cmd.Parameters.AddWithValue("@Estado", usuario.Estado);
+
+                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
+                    cmd.Parameters.Add(pResultado);
+                    cmd.Parameters.Add(pMensaje);
+
                     conn.Open();
                     cmd.ExecuteNonQuery();
+
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
+                    return pResultado.Value != DBNull.Value && Convert.ToBoolean(pResultado.Value);
                 }
-            }
-            catch (SqlException ex)
-            {
-                throw new Exception("Error en la base de datos al actualizar usuario: " + ex.Message);
             }
             catch (Exception ex)
             {
-                throw new Exception("Ocurrió un error inesperado al actualizar usuario: " + ex.Message);
+                MensajeSalida = "Error inesperado al editar usuario: " + ex.Message;
+                return false;
             }
         }
 
-        public void MtdEliminarUsuario(int codigo)
+        // ── ELIMINAR USUARIO ──
+        public string MtdEliminarUsuario(int codigo)
         {
-            try
+            using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
             {
-                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_EliminarUsuario", conn))
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand("usp_EliminarUsuarios", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@CodigoUsuario", codigo);
-                    conn.Open();
+
+                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
+                    cmd.Parameters.Add(pResultado);
+                    cmd.Parameters.Add(pMensaje);
+
                     cmd.ExecuteNonQuery();
+
+                    bool resultado = Convert.ToBoolean(pResultado.Value);
+                    string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje del servidor";
+
+                    if (!resultado)
+                        throw new Exception(mensaje);
+
+                    return mensaje;
                 }
             }
-            catch (SqlException ex)
+        }
+
+        public List<UsuarioModelo> MtdBuscarUsuario(string nombre)
+        {
+            var lista = new List<UsuarioModelo>();
+            try
             {
-                throw new Exception("Error en la base de datos al eliminar usuario: " + ex.Message);
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("BuscarUsuarios", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Nombre", nombre ?? "");
+
+                    conn.Open();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new UsuarioModelo
+                            {
+                                CodigoUsuario = Convert.ToInt32(dr["CodigoUsuario"]),
+                                CodigoEmpleado = dr["CodigoEmpleado"] != DBNull.Value ? Convert.ToInt32(dr["CodigoEmpleado"]) : 0,
+                                CodigoRol = dr["CodigoRol"] != DBNull.Value ? Convert.ToInt32(dr["CodigoRol"]) : 0,
+                                Nombre = dr["Nombre"].ToString(),
+                                Clave = dr["Clave"].ToString(),
+                                Estado = Convert.ToBoolean(dr["Estado"])
+                            });
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception("Ocurrió un error inesperado al eliminar usuario: " + ex.Message);
+                throw new Exception("Error en Datos al buscar usuario: " + ex.Message);
             }
+            return lista;
         }
     }
 }

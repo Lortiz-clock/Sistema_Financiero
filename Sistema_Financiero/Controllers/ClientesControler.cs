@@ -5,15 +5,16 @@ using Sistema_Financiero.Services;
 
 namespace Sistema_Financiero.Controllers
 {
-    [Authorize(Roles = "Administrador,Supervisor")]
-    public class EmpleadosController : Controller
+    // Se mantiene el rol original de Clientes para permitir lectura general
+    [Authorize(Roles = "Administrador,Supervisor,Operario")]
+    public class ClientesController : Controller
     {
-        private readonly EmpleadosNegocio _empleadosNegocio;
-        private readonly SucursalesNegocio _sucursalesNegocio;
-        public EmpleadosController(EmpleadosNegocio empleadosNegocio, SucursalesNegocio sucursalesNegocio)
+        private readonly ClientesNegocio _clientesNegocio;
+
+        // Constructor adaptado a la estructura de Empleados
+        public ClientesController(ClientesNegocio clientesNegocio)
         {
-            _empleadosNegocio = empleadosNegocio;
-            _sucursalesNegocio = sucursalesNegocio;
+            _clientesNegocio = clientesNegocio;
         }
 
         // =========================================================================
@@ -21,44 +22,45 @@ namespace Sistema_Financiero.Controllers
         // =========================================================================
         public IActionResult Index(string buscarNombre)
         {
-            List<EmpleadosModelo> empleados;
+            List<ClientesModelo> clientes;
 
             if (!string.IsNullOrEmpty(buscarNombre))
             {
-                empleados = _empleadosNegocio.MtdBuscarEmpleado(buscarNombre);
+                clientes = _clientesNegocio.MtdBuscarCliente(buscarNombre);
                 ViewBag.BusquedaActual = buscarNombre;
             }
             else
             {
-                empleados = _empleadosNegocio.MtdConsultarEmpleados();
+                // Pasar un string vacío al método que requiere el parámetro 'nombre'
+                clientes = _clientesNegocio.MtdConsultarClientes(string.Empty);
             }
 
-            return View(empleados);
+            return View(clientes);
         }
 
         // =========================================================================
-        // AGREGAR EMPLEADO
+        // AGREGAR CLIENTE
         // =========================================================================
         [Authorize(Roles = "Administrador")]
         public IActionResult Agregar()
         {
-            // 3. Cargamos las sucursales antes de abrir la vista de Agregar
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
+            // Cargamos los municipios antes de abrir la vista de Agregar
+            ViewBag.Municipios = _clientesNegocio.MtdConsultarMunicipios();
             return View();
         }
 
         [Authorize(Roles = "Administrador")]
         [HttpPost]
-        public IActionResult Agregar(EmpleadosModelo empleado)
+        public IActionResult Agregar(ClientesModelo cliente)
         {
             if (!ModelState.IsValid)
             {
-                // Si el modelo es inválido, debemos recargar las sucursales antes de retornar la vista
-                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
-                return View(empleado);
+                // Si el modelo es inválido, recargamos los municipios antes de retornar la vista
+                ViewBag.Municipios = _clientesNegocio.MtdConsultarMunicipios();
+                return View(cliente);
             }
 
-            bool exito = _empleadosNegocio.MtdAgregarEmpleado(empleado, out string mensajeBDD);
+            bool exito = _clientesNegocio.MtdAgregarCliente(cliente, out string mensajeBDD);
 
             if (exito)
             {
@@ -66,43 +68,43 @@ namespace Sistema_Financiero.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Si falla la base de datos, también recargamos las sucursales
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
+            // Si falla la base de datos, también recargamos los municipios
+            ViewBag.Municipios = _clientesNegocio.MtdConsultarMunicipios();
             ViewBag.Error = mensajeBDD;
-            return View(empleado);
+            return View(cliente);
         }
 
         // =========================================================================
-        // EDITAR / ACTUALIZAR EMPLEADO
+        // EDITAR / ACTUALIZAR CLIENTE
         // =========================================================================
         [Authorize(Roles = "Administrador")]
         public IActionResult Editar(int id)
         {
-            var empleado = _empleadosNegocio.MtdConsultarEmpleados()
-                .Find(e => e.CodigoEmpleado == id);
+            var cliente = _clientesNegocio.MtdConsultarClientes(string.Empty)
+                .Find(c => c.CodigoCliente == id);
 
-            if (empleado == null)
+            if (cliente == null)
             {
-                TempData["MensajeError"] = "No se encontró el empleado a editar.";
+                TempData["MensajeError"] = "No se encontró el cliente a editar.";
                 return RedirectToAction("Index");
             }
 
-            // 4. Cargamos las sucursales también en la vista de Editar para poder reasignar sucursal si se requiere
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
-            return View(empleado);
+            // Cargamos los municipios también en la vista de Editar por si se requiere cambiar
+            ViewBag.Municipios = _clientesNegocio.MtdConsultarMunicipios();
+            return View(cliente);
         }
 
         [Authorize(Roles = "Administrador")]
         [HttpPost]
-        public IActionResult Editar(EmpleadosModelo empleado)
+        public IActionResult Editar(ClientesModelo cliente)
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
-                return View(empleado);
+                ViewBag.Municipios = _clientesNegocio.MtdConsultarMunicipios();
+                return View(cliente);
             }
 
-            bool exito = _empleadosNegocio.MtdActualizarEmpleado(empleado, out string mensajeBDD);
+            bool exito = _clientesNegocio.MtdActualizarCliente(cliente, out string mensajeBDD);
 
             if (exito)
             {
@@ -110,19 +112,19 @@ namespace Sistema_Financiero.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Sucursales = _sucursalesNegocio.MtdConsultarSucursal();
+            ViewBag.Municipios = _clientesNegocio.MtdConsultarMunicipios();
             ViewBag.Error = mensajeBDD;
-            return View(empleado);
+            return View(cliente);
         }
 
         // =========================================================================
-        // ELIMINAR EMPLEADO
+        // ELIMINAR CLIENTE
         // =========================================================================
         [Authorize(Roles = "Administrador")]
         [HttpPost]
         public IActionResult Eliminar(int id)
         {
-            bool exito = _empleadosNegocio.MtdEliminarEmpleado(id, out string mensajeBDD);
+            bool exito = _clientesNegocio.MtdEliminarCliente(id, out string mensajeBDD);
 
             if (exito) TempData["MensajeExito"] = mensajeBDD;
             else TempData["MensajeError"] = mensajeBDD;

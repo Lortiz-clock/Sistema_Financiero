@@ -1,42 +1,43 @@
 ﻿using Sistema_Financiero.data;
 using Sistema_Financiero.Models;
+using System.Data;
 
-public class SucursalesNegocio
+namespace Sistema_Financiero.Services
 {
-    private readonly SucursalesDatos _sucursalDatos;
-
-    public SucursalesNegocio(SucursalesDatos sucursalDatos)
+    public class SucursalesNegocio
     {
-        _sucursalDatos = sucursalDatos;
-    }
+        private readonly SucursalesDatos _sucursalDatos;
+        public SucursalesNegocio(SucursalesDatos sucursalDatos)
+        {
+            _sucursalDatos = sucursalDatos;
+        }
 
-    public bool MtdAgregarSucursal(SucursalesModelo sucursalDatos, out string MensajeSalida)
-    {
-        return _sucursalDatos.MtdAgregarSucursal(sucursalDatos, out MensajeSalida);
-    }
+        public bool MtdAgregarSucursal(SucursalesModelo sucursalDatos, out string MensajeSalida)
+        {
+            return _sucursalDatos.MtdAgregarSucursal(sucursalDatos, out MensajeSalida);
+        }
 
-   
-    public string MtdEditarSucursal(SucursalesModelo sucursalDatos, out string MensajeSalida)
-    {
-        
-        return _sucursalDatos.MtdEditarSucursal(sucursalDatos, out MensajeSalida);
-    }
 
-   
-    public string MtdEliminarSucursal(int CodigoSucursal)
-    {
-        
-        return _sucursalDatos.MtdEliminarSucursal(CodigoSucursal);
-    }
+        public bool MtdEditarSucursal(SucursalesModelo sucursalDatos, out string MensajeSalida)
+        {
+            return _sucursalDatos.MtdActualizarSucursal(sucursalDatos, out MensajeSalida);
+        }
 
-    public List<SucursalesModelo> MtdBuscarSucursal(string Nombre)
-    {
-        string NombreBuscar = Nombre?.Trim() ?? "";
-        return _sucursalDatos.MtdBuscarSucursal(NombreBuscar);
-    }
 
-    public List<SucursalesModelo> MtdConsultarSucursal()
-    {
-        return _sucursalDatos.MtdConsultarSucursal();
+        public bool MtdEliminarSucursal(int CodigoSucursal)
+        {
+
+            return _sucursalDatos.MtdEliminarSucursal(CodigoSucursal, out string mensajeSalida);
+        }
+
+        public List<SucursalesModelo> MtdBuscarSucursal(string Nombre)
+        {
+            return _sucursalDatos.MtdBuscarSucursal(Nombre);
+        }
+
+        public List<SucursalesModelo> MtdConsultarSucursal()
+        {
+            return _sucursalDatos.MtdConsultarSucursal();
+        }
     }
 }

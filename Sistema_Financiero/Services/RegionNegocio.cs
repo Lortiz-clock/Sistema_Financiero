@@ -11,20 +11,9 @@ namespace Sistema_Financiero.Logica
         {
             _regionDatos = regionDatos;
         }
-        public string MtdAgregarRegion(RegionModelo region)
+        public bool MtdAgregarRegion(RegionModelo region, out string mensajeSalida)
         {
-            if (region == null)
-                throw new Exception("No se resibieron datos");
-            if (string.IsNullOrWhiteSpace(region.Nombre))
-                throw new Exception("El nombre de la región no puede estar vacío.");
-            try
-            {
-                return _regionDatos.MtdAgregarRegion(region);
-            }
-            catch 
-            {
-                throw;
-            }
+            return _regionDatos.MtdAgregarRegion(region, out mensajeSalida);
         }
 
         public List<RegionModelo> MtdConsultarRegion()
@@ -34,41 +23,17 @@ namespace Sistema_Financiero.Logica
 
         public List<RegionModelo> MtdBuscarRegion(string nombre)
         {
-            if (string.IsNullOrWhiteSpace(nombre))
-            {
-                return _regionDatos.MtdConsultarRegion();
-            }
-
-            return _regionDatos.MtdBuscarRegion(nombre.Trim());
+            return _regionDatos.MtdBuscarRegion(nombre);
         }
 
         public bool MtdEliminarRegion(int Codigo, out string mensajeSalida)
         {
-            if (Codigo <= 0)
-            {
-                mensajeSalida = "El código de la región no es válido.";
-                return false;
-            }
-
-            return _regionDatos.MtdEliminarRegion(Codigo, out mensajeSalida);
+           return _regionDatos.MtdEliminarRegion(Codigo, out mensajeSalida);
         }
 
-        public string MtdEditarRegion(RegionModelo region)
+        public bool MtdActualizarRegion(RegionModelo region, out string mensajeSalida)
         {
-            if (region == null)
-                throw new Exception("No se resibieron datos");
-            if (region.CodigoRegion <= 0)
-                throw new Exception("Debe enviar el codigo de la region");
-
-            try
-            {
-                return _regionDatos.MtdEditarRegion(region);
-            }
-            catch 
-            {
-
-                throw;
-            }
+            return _regionDatos.MtdActualizarRegion(region, out mensajeSalida);
         }
     }
 }

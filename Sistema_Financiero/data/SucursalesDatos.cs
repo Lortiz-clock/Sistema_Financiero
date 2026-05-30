@@ -59,14 +59,14 @@ namespace Sistema_Financiero.data
                 using (SqlConnection conn = conexion.MtdConexionBDD())
                 using (SqlCommand cmd = new SqlCommand("usp_AgregarSucursal", conn))
                 {
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@CodigoMunicipio", sucursal.CodigoMunicipio);
                     cmd.Parameters.AddWithValue("@Nombre", sucursal.Nombre);
                     cmd.Parameters.AddWithValue("@Direccion", sucursal.Direccion);
                     cmd.Parameters.AddWithValue("@Telefono", sucursal.Telefono);
                     cmd.Parameters.AddWithValue("@Estado", sucursal.Estado ?? false);
 
-                    SqlParameter pResultado = new SqlParameter("@Resultado", System.Data.SqlDbType.Bit)
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -82,18 +82,10 @@ namespace Sistema_Financiero.data
                     conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    if (pResultado.Value != DBNull.Value && pResultado.Value != null)
-                    {
-                        resultadofinal = Convert.ToBoolean(pResultado.Value);
-                    }
-                    else
-                    {
-                        resultadofinal = false;
-                    }
 
+                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
                     MensajeSalida = pMensaje.Value?.ToString() ?? "";
 
-                    
                 }
             }
             catch (Exception ex)
@@ -105,13 +97,16 @@ namespace Sistema_Financiero.data
             return resultadofinal;
         }
        
-        public string MtdEditarSucursal(SucursalesModelo sucursal, out string MensajeSalida)
-        {
-            using (SqlConnection conn = conexion.MtdConexionBDD())
-            {
-                conn.Open();
-                using (SqlCommand cmd = new SqlCommand("usp_EditarSucursal", conn))
-                {
+        public bool MtdActualizarSucursal(SucursalesModelo sucursal, out string MensajeSalida)
+        {          
+            
+                bool resultadofinal = false;
+                MensajeSalida = "";
+              try
+              {
+                    using (SqlConnection conn = conexion.MtdConexionBDD())
+                    using (SqlCommand cmd = new SqlCommand("usp_ActualizarSucursal", conn))
+                    {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@CodigoSucursal", sucursal.CodigoSucursal);
                     cmd.Parameters.AddWithValue("@CodigoMunicipio", sucursal.CodigoMunicipio);
@@ -120,12 +115,12 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.AddWithValue("@Telefono", sucursal.Telefono);
                     cmd.Parameters.AddWithValue("@Estado", sucursal.Estado);
 
-                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
 
-                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -133,54 +128,55 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
 
+                    conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje del servidor";
-
-                    MensajeSalida = mensaje;
-
-                    return mensaje;
+                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
+
             }
-        }
-
-        public string MtdEliminarSucursal(int CodigoSucursal)
-        {            
-            using (SqlConnection conn = conexion.MtdConexionBDD())
+            catch (Exception ex)
             {
-                conn.Open();
 
+                resultadofinal = false;
+                MensajeSalida = "Ocurrio un error inesperado: " + ex.Message;
+            }
+            return resultadofinal;
+        }
+    
+     
+
+        public bool MtdEliminarSucursal(int CodigoSucursal, out string mensajeSalida)
+        {
+            bool resultadoFinal = false;
+            mensajeSalida = "";
+            try
+            {
+                using (SqlConnection conn = conexion.MtdConexionBDD())
                 using (SqlCommand cmd = new SqlCommand ("usp_EliminarSucursal", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("CodigoSucursal", CodigoSucursal);
-                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
 
-                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
 
-                    cmd.Parameters.Add(pResultado);
-                    cmd.Parameters.Add(pMensaje);
-
+                    conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value.ToString() ?? "Sin mensaje del servidor";
-
-                    if (!resultado)
-                        throw new Exception(mensaje);
-                    return mensaje;
- 
-                        
+                    resultadoFinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    mensajeSalida = pMensaje.Value?.ToString() ?? "";
+                                           
                 }
             }
+            catch (Exception ex)
+            {
+                resultadoFinal = false;
+                mensajeSalida = "Ocurrio un error inesperado al eliminar: " + ex.Message;
+            }
+            return resultadoFinal;
         }
 
         public List<SucursalesModelo> MtdBuscarSucursal(string nombre)

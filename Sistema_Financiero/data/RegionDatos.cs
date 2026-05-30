@@ -14,41 +14,46 @@ namespace Sistema_Financiero.data
             _conexionDatos = conexionDatos;
         }
         
-       public string MtdAgregarRegion(RegionModelo region)
-        {
-            using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-            {
-                conn.Open();
-
-                using (SqlCommand cmd = new SqlCommand("usp_AgregarRegion", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-
+       public bool MtdActualizarRegion(RegionModelo region, out string MensajeSalida)
+       {         
+                bool resultadofinal = false;
+                MensajeSalida = "";
+               
+             try
+             {
+                    using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                    using (SqlCommand cmd = new SqlCommand("usp_ActualizarRegion", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@CodigoRegion", region.CodigoRegion);
                     cmd.Parameters.AddWithValue("@Nombre", region.Nombre);
 
-                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
-                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
-                    
+
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
 
-                    
+                    conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value.ToString() ?? "Sin mensaje del servidor";
-                    if (!resultado)
-                        throw new ApplicationException(mensaje);
-
-                    return mensaje;
+                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
             }
+            catch (Exception ex)
+            {
+                resultadofinal = false;
+                MensajeSalida = "Ocurrio un error inesperado: " + ex.Message;
+            }
+            return resultadofinal;
         }
         public List<RegionModelo> MtdConsultarRegion()
         {
@@ -56,7 +61,7 @@ namespace Sistema_Financiero.data
             try
             {
                 using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-                using (SqlCommand cmd = new SqlCommand("usp_ConsultarRegion", conn)) // 📝 Verifica si en tu BDD tiene la "t" o es "usp_ConsularRegion"
+                using (SqlCommand cmd = new SqlCommand("usp_ConsultarRegion", conn)) 
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     conn.Open();
@@ -145,25 +150,26 @@ namespace Sistema_Financiero.data
             return resultadoFinal;
         }
 
-        public string MtdEditarRegion(RegionModelo region)
+        public bool MtdAgregarRegion(RegionModelo region, out string MensajeSalida)
         {
-            using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
-            {
-                conn.Open();
+            bool resultadofinal = false;
+            MensajeSalida = "";
 
-                using (SqlCommand cmd = new SqlCommand("usp_ActualizarRegion", conn))
+            try
+            {
+                using (SqlConnection conn = _conexionDatos.MtdConexionBDD())
+                using (SqlCommand cmd = new SqlCommand("usp_AgregarRegion", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-
                     cmd.Parameters.AddWithValue("@CodigoRegion", region.CodigoRegion);
-                    cmd.Parameters.AddWithValue("Nombre", region.Nombre);
+                    cmd.Parameters.AddWithValue("@Nombre", region.Nombre);
+                    
 
-                    var pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
+                    SqlParameter pResultado = new SqlParameter("@Resultado", SqlDbType.Bit)
                     {
                         Direction = ParameterDirection.Output
                     };
-
-                    var pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
+                    SqlParameter pMensaje = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500)
                     {
                         Direction = ParameterDirection.Output
                     };
@@ -171,16 +177,19 @@ namespace Sistema_Financiero.data
                     cmd.Parameters.Add(pResultado);
                     cmd.Parameters.Add(pMensaje);
 
+                    conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    bool resultado = Convert.ToBoolean(pResultado.Value);
-                    string mensaje = pMensaje.Value?.ToString() ?? "Sin mensaje del servidor";
-
-                    if (!resultado)
-                        throw new ApplicationException(mensaje);
-                    return mensaje;
+                    resultadofinal = pResultado.Value != null && Convert.ToBoolean(pResultado.Value);
+                    MensajeSalida = pMensaje.Value?.ToString() ?? "";
                 }
             }
+            catch (Exception ex)
+            {
+                resultadofinal = false;
+                MensajeSalida = "Ocurrio un error inesperado al agregar: " + ex.Message;
+            }
+            return resultadofinal;
         }
 
     }

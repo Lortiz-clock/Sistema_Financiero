@@ -1,7 +1,7 @@
-﻿@model Sistema_Financiero.Models.UsuarioModelo
+﻿@model Sistema_Financiero.Models.SucursalesModelo
 
 @{
-    ViewData["Title"] = "Nuevo Usuario";
+    ViewData["Title"] = "Nueva Sucursal";
 }
 
 <style>
@@ -103,10 +103,10 @@
 </style>
 
 <h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:4px;">
-    Nuevo Usuario
+    Nueva Sucursal
 </h2>
 <p style="color:#718096;margin-bottom:1.25rem;">
-    Completá los datos para registrar un nuevo acceso al sistema.
+    Completá los datos para registrar una nueva sede comercial en el sistema.
 </p>
 
 @if (ViewBag.Error != null)
@@ -117,73 +117,53 @@
 }
 
 <div class="form-card">
-    <form action="@Url.Action("Crear", "Usuarios")" method="POST">
+    <form action="@Url.Action("Agregar", "Sucursales")" method="POST">
 
         <div class="form-grid">
 
-            <div class="section-label">Asignación de Empleado</div>
+            <div class="section-label">Identificación Sede</div>
 
             <div class="form-group full">
-                <label>Seleccionar Empleado <span class="required">*</span></label>
-                <select name="CodigoEmpleado" class="form-control" required>
-                    <option value="">— Seleccioná un empleado —</option>
-                    @if (ViewBag.Empleados != null)
-                    {
-                        @foreach (var emp in (List<Sistema_Financiero.Models.EmpleadosModelo>)ViewBag.Empleados)
-                        {
-                            <option value="@emp.CodigoEmpleado">@emp.Nombre</option>
-                        }
-                    }
-                </select>
+                <label>Nombre de la Sucursal <span class="required">*</span></label>
+                <input type="text" name="Nombre" class="form-control" placeholder="ej: Sucursal Central o Agencia Norte" required />
             </div>
 
             <hr class="form-divider" />
 
-            <div class="section-label">Credenciales de Acceso</div>
+            <div class="section-label">Ubicación y Contacto</div>
 
             <div class="form-group">
-                <label>Nombre de Usuario <span class="required">*</span></label>
-                <input type="text" name="Nombre" class="form-control"
-                       placeholder="ej: j.perez" required />
+                <label>Código de Municipio <span class="required">*</span></label>
+                <input type="number" name="CodigoMunicipio" class="form-control" placeholder="ej: 101" required />
             </div>
 
             <div class="form-group">
-                <label>Contraseña <span class="required">*</span></label>
-                <input type="password" name="Clave" class="form-control"
-                       placeholder="••••••••" required />
+                <label>Teléfono de Contacto <span class="required">*</span></label>
+                <input type="text" name="Telefono" class="form-control" placeholder="ej: 2233-4455" required />
+            </div>
+
+            <div class="form-group full">
+                <label>Dirección Física de la Sucursal <span class="required">*</span></label>
+                <input type="text" name="Direccion" class="form-control" placeholder="Escribe la calle, avenida, zona o punto de referencia..." required />
             </div>
 
             <hr class="form-divider" />
 
-            <div class="section-label">Permisos y Estado</div>
+            <div class="section-label">Operación</div>
 
             <div class="form-group">
-                <label>Rol asignado <span class="required">*</span></label>
-                <select name="CodigoRol" class="form-control" required>
-                    <option value="">— Seleccioná un rol —</option>
-                    @if (ViewBag.Roles != null)
-                    {
-                        @foreach (var rol in (List<Sistema_Financiero.Models.RolModelo>)ViewBag.Roles)
-                        {
-                            <option value="@rol.CodigoRol">@rol.Nombre</option>
-                        }
-                    }
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Estado <span class="required">*</span></label>
+                <label>Estado Inicial <span class="required">*</span></label>
                 <select name="Estado" class="form-control">
-                    <option value="true">Activo</option>
-                    <option value="false">Inactivo</option>
+                    <option value="true">Activo (Habilitada)</option>
+                    <option value="false">Inactivo (Deshabilitada)</option>
                 </select>
             </div>
 
             <hr class="form-divider" />
 
             <div style="grid-column: 1 / -1;">
-                <button type="submit" class="btn-guardar">Guardar</button>
-                <a href="@Url.Action("Index", "Usuarios")" class="btn-cancelar">Cancelar</a>
+                <button type="submit" class="btn-guardar">Guardar Sucursal</button>
+                <a href="@Url.Action("Index", "Sucursales")" class="btn-cancelar">Cancelar</a>
             </div>
 
         </div>

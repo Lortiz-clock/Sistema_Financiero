@@ -1,7 +1,7 @@
-﻿@model List<Sistema_Financiero.Models.UsuarioModelo>
+﻿@model List<Sistema_Financiero.Models.SucursalesModelo>
 
 @{
-    ViewData["Title"] = "Lista de Usuarios";
+    ViewData["Title"] = "Lista de Sucursales";
 }
 
 <style>
@@ -146,30 +146,30 @@
 </style>
 
 <h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:5px;">
-    Lista de Usuarios
+    Lista de Sucursales
 </h2>
-<p style="color:#718096;margin-bottom:20px;">Gestión de accesos y roles del sistema.</p>
+<p style="color:#718096;margin-bottom:20px;">Gestión de sedes, agencias y ubicaciones físicas del sistema.</p>
 
 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 15px;">
     <div>
         @if (User.IsInRole("Administrador"))
         {
-            <a href="@Url.Action("Crear", "Usuarios")" class="btn-nuevo">
-                <i class="fa-solid fa-plus"></i> Nuevo Usuario
+            <a href="@Url.Action("Agregar", "Sucursales")" class="btn-nuevo">
+                <i class="fa-solid fa-plus"></i> Nueva Sucursal
             </a>
         }
     </div>
 
-    <form action="@Url.Action("Index", "Usuarios")" method="GET" style="margin: 0; display: flex; align-items: center;">
+    <form action="@Url.Action("Index", "Sucursales")" method="GET" style="margin: 0; display: flex; align-items: center;">
         <div class="search-box">
-            <input type="text" name="buscarNombre" class="search-input" placeholder="Buscar usuario..." value="@ViewBag.BusquedaActual" />
+            <input type="text" name="buscarNombre" class="search-input" placeholder="Buscar sucursal..." value="@ViewBag.BusquedaActual" />
             <button type="submit" class="search-btn">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </button>
         </div>
         @if (!string.IsNullOrEmpty(ViewBag.BusquedaActual))
         {
-            <a href="@Url.Action("Index", "Usuarios")" class="btn-clear" title="Limpiar búsqueda">
+            <a href="@Url.Action("Index", "Sucursales")" class="btn-clear" title="Limpiar búsqueda">
                 <i class="fa-solid fa-circle-xmark"></i> Limpiar
             </a>
         }
@@ -189,21 +189,16 @@
         <i class="fa-solid fa-circle-exclamation"></i> @TempData["MensajeError"]
     </div>
 }
-@if (ViewBag.Error != null)
-{
-    <div style="background-color:#ffeeee;color:#e53e3e;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:15px;font-family:'Segoe UI',sans-serif;">
-        <i class="fa-solid fa-circle-exclamation"></i> @ViewBag.Error
-    </div>
-}
 
 <div class="table-container">
     <table class="custom-table">
         <thead>
             <tr>
                 <th>Código</th>
-                <th>Empleado</th>
-                <th>Usuario</th>
-                <th>Rol</th>
+                <th>Nombre Sucursal</th>
+                <th>Contacto Tel.</th>
+                <th>Dirección Física</th>
+                <th>Municipio ID</th>
                 <th>Estado</th>
                 @if (User.IsInRole("Administrador"))
                 {
@@ -215,22 +210,23 @@
             @if (Model == null || !Model.Any())
             {
                 <tr>
-                    <td colspan="@(User.IsInRole("Administrador") ? "6" : "5")" style="text-align: center; color: #a0aec0; padding: 20px;">
-                        No se encontraron usuarios.
+                    <td colspan="@(User.IsInRole("Administrador") ? "7" : "6")" style="text-align: center; color: #a0aec0; padding: 20px;">
+                        No se encontraron sucursales registradas.
                     </td>
                 </tr>
             }
             else
             {
-                @foreach (var u in Model)
+                @foreach (var s in Model)
                 {
                     <tr>
-                        <td><strong>@u.CodigoUsuario</strong></td>
-                        <td class="text-nowrap">@u.NombreEmpleado</td>
-                        <td>@u.NombreUsuario</td>
-                        <td>@u.NombreRol</td>
+                        <td><strong>@s.CodigoSucursal</strong></td>
+                        <td class="text-nowrap" style="font-weight: 500; color: #1e40af;">@s.Nombre</td>
+                        <td>@s.Telefono</td>
+                        <td>@s.Direccion</td>
+                        <td><span style="color:#718096;">@s.CodigoMunicipio</span></td>
                         <td>
-                            @if (u.Estado)
+                            @if (s.Estado ?? false)
                             {
                                 <span class="badge badge-activo">Activo</span>
                             }
@@ -242,12 +238,12 @@
                         @if (User.IsInRole("Administrador"))
                         {
                             <td class="text-nowrap">
-                                <a href="@Url.Action("Editar", "Usuarios", new { id = u.CodigoUsuario })" class="btn-accion btn-editar">
+                                <a href="@Url.Action("Editar", "Sucursales", new { id = s.CodigoSucursal })" class="btn-accion btn-editar">
                                     <i class="fa-solid fa-pen"></i> Editar
                                 </a>
-                                <form action="@Url.Action("Eliminar", "Usuarios", new { id = u.CodigoUsuario })"
+                                <form action="@Url.Action("Eliminar", "Sucursales", new { id = s.CodigoSucursal })"
                                       method="POST" style="display:inline;"
-                                      onsubmit="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                      onsubmit="return confirm('¿Estás seguro de eliminar esta sucursal?')">
                                     <button type="submit" class="btn-accion btn-eliminar">
                                         <i class="fa-solid fa-trash"></i> Eliminar
                                     </button>

@@ -1,10 +1,11 @@
-﻿@model Sistema_Financiero.Models.UsuarioModelo
+﻿@model Sistema_Financiero.Models.SucursalesModelo
 
 @{
-    ViewData["Title"] = "Editar Usuario";
+    ViewData["Title"] = "Editar Sucursal";
 }
 
 <style>
+    /* Estilos simétricos para consistencia visual total en el sistema */
     .form-card {
         background: var(--color-background-primary, #ffffff);
         border: 0.5px solid var(--color-border-tertiary, #e2e8f0);
@@ -103,10 +104,10 @@
 </style>
 
 <h2 style="font-family:'Segoe UI',sans-serif;color:#2d3748;font-weight:600;margin-bottom:4px;">
-    Editar Usuario
+    Editar Sucursal
 </h2>
 <p style="color:#718096;margin-bottom:1.25rem;">
-    Modificá los datos del usuario seleccionado.
+    Modificá las especificaciones y el estado operacional de la sucursal seleccionada.
 </p>
 
 @if (ViewBag.Error != null)
@@ -117,63 +118,41 @@
 }
 
 <div class="form-card">
-    <form action="@Url.Action("Editar", "Usuarios")" method="POST">
+    <form action="@Url.Action("Editar", "Sucursales")" method="POST">
 
-        <input type="hidden" name="CodigoUsuario" value="@Model.CodigoUsuario" />
+        <input type="hidden" name="CodigoSucursal" value="@Model.CodigoSucursal" />
 
         <div class="form-grid">
 
-            <div class="section-label">Asignación de Empleado</div>
+            <div class="section-label">Identificación Sede</div>
 
             <div class="form-group full">
-                <label>Seleccionar Empleado <span class="required">*</span></label>
-                <select name="CodigoEmpleado" class="form-control" required>
-                    <option value="">— Seleccioná un empleado —</option>
-                    @if (ViewBag.Empleados != null)
-                    {
-                        @foreach (var emp in (List<Sistema_Financiero.Models.EmpleadosModelo>)ViewBag.Empleados)
-                        {
-                            <option value="@emp.CodigoEmpleado" selected="@(emp.CodigoEmpleado == Model.CodigoEmpleado)">
-                                @emp.Nombre
-                            </option>
-                        }
-                    }
-                </select>
-            </div>
-
-            <hr class="form-divider" />
-
-            <div class="section-label">Credenciales de Acceso</div>
-
-            <div class="form-group">
-                <label>Nombre de Usuario <span class="required">*</span></label>
+                <label>Nombre de la Sucursal <span class="required">*</span></label>
                 <input type="text" name="Nombre" class="form-control" value="@Model.Nombre" required />
             </div>
 
+            <hr class="form-divider" />
+
+            <div class="section-label">Ubicación y Contacto</div>
+
             <div class="form-group">
-                <label>Nueva Contraseña (Opcional)</label>
-                <input type="password" name="Clave" class="form-control" placeholder="Dejar vacío para no cambiar" />
+                <label>Código de Municipio <span class="required">*</span></label>
+                <input type="number" name="CodigoMunicipio" class="form-control" value="@Model.CodigoMunicipio" required />
+            </div>
+
+            <div class="form-group">
+                <label>Teléfono de Contacto <span class="required">*</span></label>
+                <input type="text" name="Telefono" class="form-control" value="@Model.Telefono" required />
+            </div>
+
+            <div class="form-group full">
+                <label>Dirección Física de la Sucursal <span class="required">*</span></label>
+                <input type="text" name="Direccion" class="form-control" value="@Model.Direccion" required />
             </div>
 
             <hr class="form-divider" />
 
-            <div class="section-label">Permisos y Estado</div>
-
-            <div class="form-group">
-                <label>Rol asignado <span class="required">*</span></label>
-                <select name="CodigoRol" class="form-control" required>
-                    <option value="">— Seleccioná un rol —</option>
-                    @if (ViewBag.Roles != null)
-                    {
-                        @foreach (var rol in (List<Sistema_Financiero.Models.RolModelo>)ViewBag.Roles)
-                        {
-                            <option value="@rol.CodigoRol" selected="@(rol.CodigoRol == Model.CodigoRol)">
-                                @rol.Nombre
-                            </option>
-                        }
-                    }
-                </select>
-            </div>
+            <div class="section-label">Operación</div>
 
             <div class="form-group">
                 <label>Estado <span class="required">*</span></label>
@@ -187,7 +166,7 @@
 
             <div style="grid-column: 1 / -1;">
                 <button type="submit" class="btn-guardar">Guardar Cambios</button>
-                <a href="@Url.Action("Index", "Usuarios")" class="btn-cancelar">Cancelar</a>
+                <a href="@Url.Action("Index", "Sucursales")" class="btn-cancelar">Cancelar</a>
             </div>
 
         </div>
